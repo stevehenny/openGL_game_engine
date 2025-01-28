@@ -16,4 +16,4 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 #Link libraries
-target_link_libraries(${PROJECT_NAME} GL glfw dl)
+target_link_libraries(${PROJECT_NAME} GL glfw dl m)

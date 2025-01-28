@@ -1,25 +1,34 @@
 #include "include/glad/glad.h"
 #include "window_callbacks.h"
 #include <GLFW/glfw3.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-const char *vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
+// Function to load shader source from a file
+char *loadShaderSource(const char *filePath) {
+  FILE *file = fopen(filePath, "r");
+  if (!file) {
+    fprintf(stderr, "ERROR: Could not open shader file: %s\n", filePath);
+    exit(EXIT_FAILURE);
+  }
 
-// Fragment shader source code
-const char *fragmentShaderSource =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\0";
+  fseek(file, 0, SEEK_END);
+  long fileSize = ftell(file);
+  fseek(file, 0, SEEK_SET);
+
+  char *shaderSource = (char *)malloc(fileSize + 1);
+  if (!shaderSource) {
+    fprintf(stderr, "ERROR: Could not allocate memory for shader source\n");
+    exit(EXIT_FAILURE);
+  }
+
+  fread(shaderSource, 1, fileSize, file);
+  shaderSource[fileSize] = '\0'; // Null-terminate the string
+
+  fclose(file);
+  return shaderSource;
+}
 
 // Function to check shader compilation status
 void checkShaderCompilation(unsigned int shader, const char *type) {
@@ -44,7 +53,6 @@ void checkProgramLinking(unsigned int program) {
   }
 }
 
-// Main function
 int main() {
   // Initialize GLFW
   if (!glfwInit()) {
@@ -102,15 +110,19 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
+  // Load shader sources from files
+  char *vertexShaderSource = loadShaderSource("shaders/vertexShader.vert");
+  char *fragmentShaderSource = loadShaderSource("shaders/fragmentShader.frag");
+
   // Create and compile the vertex shader
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+  glShaderSource(vertexShader, 1, (const char **)&vertexShaderSource, NULL);
   glCompileShader(vertexShader);
   checkShaderCompilation(vertexShader, "VERTEX");
 
   // Create and compile the fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+  glShaderSource(fragmentShader, 1, (const char **)&fragmentShaderSource, NULL);
   glCompileShader(fragmentShader);
   checkShaderCompilation(fragmentShader, "FRAGMENT");
 
@@ -125,6 +137,10 @@ int main() {
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
+  // Free the shader source memory
+  free(vertexShaderSource);
+  free(fragmentShaderSource);
+
   // Main render loop
   while (!glfwWindowShouldClose(window)) {
     // Input handling
@@ -136,6 +152,12 @@ int main() {
 
     // Use the shader program and draw the triangle
     glUseProgram(shaderProgram);
+    float timeValue = glfwGetTime();
+    float greenValue = sin(timeValue) / 2.0f + 0.5f;
+    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+    glUseProgram(shaderProgram);
+    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3); // Drawing a single triangle
 
