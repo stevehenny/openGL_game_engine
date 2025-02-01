@@ -1,4 +1,4 @@
-#include "include/glad/glad.h"
+#include "../../include/glad/glad.h"
 #include "window_callbacks.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -19,29 +19,6 @@ const char *fragmentShaderSource =
     "{\n"
     "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\0";
-
-// Function to check shader compilation status
-void checkShaderCompilation(unsigned int shader, const char *type) {
-  int success;
-  char infoLog[512];
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(shader, 512, NULL, infoLog);
-    fprintf(stderr, "ERROR::SHADER::%s::COMPILATION_FAILED\n%s\n", type,
-            infoLog);
-  }
-}
-
-// Function to check shader program linking status
-void checkProgramLinking(unsigned int program) {
-  int success;
-  char infoLog[512];
-  glGetProgramiv(program, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(program, 512, NULL, infoLog);
-    fprintf(stderr, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
-  }
-}
 
 // Main function
 int main() {
