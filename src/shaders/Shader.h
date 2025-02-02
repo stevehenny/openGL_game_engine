@@ -1,14 +1,6 @@
-
-#include "../include/glad/glad.h"
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#ifndef SHADER_CLASS
+#define SHADER_CLASS
 #include <string>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 class Shader {
 public:
@@ -25,6 +17,4 @@ public:
   void setFloat(const std::string &name, float value) const;
 };
 
-#ifdef __cplusplus
-}
-#endif
+#endif // !SHADER_CLASS

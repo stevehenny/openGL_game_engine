@@ -1,7 +1,7 @@
 #include <cstdlib>
 #define STB_IMAGE_IMPLEMENTATION
+#include "../include/glad/glad.h"
 #include "Shader.h"
-#include "glad/glad.h"
 #include "stb_image.h"
 #include "window_callbacks.h"
 #include <GLFW/glfw3.h>
@@ -12,7 +12,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
+#include <iostream>
 #include <math.h>
+#include <ostream>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -91,7 +93,7 @@ int main(int argc, char *argv[]) {
   float offsetY = height / 3.0f; // Centering the triangle
 
   float vertices[] = {
-      // positions        // colors
+      // positions             // colors         //textures
       0.5f,  -offsetY,         0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
       1.0f, // Bottom right
       -0.5f, -offsetY,         0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -146,8 +148,8 @@ int main(int argc, char *argv[]) {
     float timeValue = glfwGetTime();
     float angle = timeValue;
     glm::mat4 transform = glm::mat4(1.0f);
-    transform =
-        glm::rotate(transform, angle, glm::vec3(0.0f, 0.0f, sqrt(3.0f) / 3));
+    transform = glm::rotate(
+        transform, angle, glm::vec3(0.0f, 0.0f, side_length * sqrt(3.0f) / 3));
 
     int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
