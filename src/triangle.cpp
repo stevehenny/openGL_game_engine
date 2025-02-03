@@ -39,13 +39,13 @@ int main(int argc, char *argv[]) {
   }
 
   // Configure GLFW to use OpenGL 3.3 Core Profile
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Create a window
   GLFWwindow *window =
-      glfwCreateWindow(800, 600, "OpenGL Triangle", NULL, NULL);
+      glfwCreateWindow(1920, 1080, "OpenGL Triangle", NULL, NULL);
   if (!window) {
     fprintf(stderr, "Failed to create GLFW window\n");
     glfwTerminate();
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Set the viewport and framebuffer size callback
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, 1920, 1080);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   // Initialize the texture
