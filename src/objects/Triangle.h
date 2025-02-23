@@ -12,10 +12,11 @@ class Triangle : public Shape {
 protected:
   void generateVertices() override;
   void draw() const override;
-  void generateVertices(float vertices[], size_t count);
+  void generateVertices(const float *Inputvertices, size_t count);
 
 public:
   Triangle(unsigned int VAO, unsigned int VBO, float verticies[]);
+  ~Triangle();
 };
 
 #endif // !TRIANGLE_H
