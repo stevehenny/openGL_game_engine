@@ -10,13 +10,12 @@ using namespace std;
 class Triangle : public Shape {
 
 protected:
-  void generateVertices() override;
-  void draw() const override;
-  void generateVertices(const float *Inputvertices, size_t count);
+  void generateVertices(const float *inputVertices, size_t count);
 
 public:
-  Triangle(unsigned int VAO, unsigned int VBO, float verticies[]);
-  ~Triangle();
+  Triangle(unsigned int VAO, unsigned int VBO, const float *inputVertices);
+  ~Triangle() = default;
+  void draw() const override;
 };
 
 #endif // !TRIANGLE_H

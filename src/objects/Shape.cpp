@@ -1,4 +1,5 @@
 #include "Shape.h"
+#include <stdexcept>
 
 Shape::Shape(unsigned int VAO, unsigned int VBO) : VAO(VAO), VBO(VBO) {}
 
@@ -8,8 +9,10 @@ Shape::~Shape() {
 }
 
 void Shape::setup() {
-  generateVertices(); // Ensure vertices are generated
-
+  if (vertices.size() == 0) {
+    throw std::runtime_error("ERROR:DID NOT GENERATE VERTICES");
+    return;
+  }
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 

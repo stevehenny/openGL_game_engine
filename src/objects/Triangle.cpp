@@ -2,30 +2,15 @@
 #include "Shape.h"
 #include <math.h>
 
-Triangle::Triangle(unsigned int VAO, unsigned int VBO, float vertices[])
+Triangle::Triangle(unsigned int VAO, unsigned int VBO,
+                   const float *inputVertices)
     : Shape(VAO, VBO) {
-  generateVertices(vertices, 24);
+  generateVertices(inputVertices, 24);
   setup();
 }
 
-void Triangle::generateVertices() {
-  // Default triangle if no external data is provided.
-  float side_length = 1.0f;
-  float height = sqrt(3) / 2 * side_length;
-  float offsetY = height / 3.0f;
-  float defaultVertices[24] = {
-      0.5f,  -offsetY,         0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-      1.0f, // Bottom right
-      -0.5f, -offsetY,         0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-      1.0f, // Bottom left
-      0.0f,  height - offsetY, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f,
-      0.0f // Top
-  };
-  generateVertices(defaultVertices, 24);
-}
-
-void Triangle::generateVertices(const float *Inputvertices, size_t count) {
-  vertices.assign(Inputvertices, Inputvertices + count);
+void Triangle::generateVertices(const float *inputVertices, size_t count) {
+  vertices.assign(inputVertices, inputVertices + count);
 }
 
 void Triangle::draw() const {

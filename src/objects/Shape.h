@@ -11,13 +11,11 @@ protected:
   vector<float> vertices;
   unsigned int VAO, VBO;
 
-  virtual void generateVertices() = 0; // Force subclasses to redefine
-  virtual void draw() const = 0;
-
 public:
   Shape(unsigned int VAO, unsigned int VBO);
   virtual ~Shape();
   void setup();
+  virtual void draw() const = 0;
 };
 
 #endif // !SHAPE_H
