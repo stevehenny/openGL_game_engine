@@ -1,9 +1,9 @@
 #include <cstdlib>
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/glad/glad.h"
-#include "Shader.h"
+#include "shaders/Shader.h"
 #include "stb_image.h"
-#include "window_callbacks.h"
+#include "window_functions/window_functions.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <glm/ext/matrix_float4x4.hpp>
@@ -32,37 +32,7 @@ int main(int argc, char *argv[]) {
   const char *fragmentShaderPath = argv[2];
   const char *texturePath = argv[3];
 
-  // Initialize GLFW
-  if (!glfwInit()) {
-    fprintf(stderr, "Failed to initialize GLFW\n");
-    return -1;
-  }
-
-  // Configure GLFW to use OpenGL 3.3 Core Profile
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  // Create a window
-  GLFWwindow *window =
-      glfwCreateWindow(1920, 1080, "OpenGL Triangle", NULL, NULL);
-  if (!window) {
-    fprintf(stderr, "Failed to create GLFW window\n");
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
-
-  // Load OpenGL function pointers using GLAD
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    fprintf(stderr, "Failed to initialize GLAD\n");
-    return -1;
-  }
-
-  // Set the viewport and framebuffer size callback
-  glViewport(0, 0, 1920, 1080);
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+  GLFWwindow *window = create_window(1920, 1080);
   // Initialize the texture
   unsigned int texture;
   glGenTextures(1, &texture);

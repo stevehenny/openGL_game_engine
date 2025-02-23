@@ -3,6 +3,6 @@ project(openGL_game_engine LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_BUILD_TYPE Release)
 # Include directories
-include_directories(${OPENGL_INCLUDE_DIRS} include shaders src)
+include_directories(${OPENGL_INCLUDE_DIRS} include shaders src window_functions)
 add_subdirectory(src)
 

@@ -1,11 +1,12 @@
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/shaders)
+include_directories(${CMAKE_SOURCE_DIR}/window_functions)
 
 add_subdirectory(shaders)
+add_subdirectory(window_functions)
 
 add_executable(openGL_game_engine
     triangle.cpp
-    window_callbacks.c
     glad.c
 )
 
@@ -17,5 +18,5 @@ set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
 # Link libraries
-target_link_libraries(openGL_game_engine OpenGL::GL glfw dl m shaders)
+target_link_libraries(openGL_game_engine OpenGL::GL glfw dl m shaders window_functions)
 
