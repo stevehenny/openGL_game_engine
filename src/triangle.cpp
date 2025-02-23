@@ -1,11 +1,10 @@
-#include <cstdlib>
-#define STB_IMAGE_IMPLEMENTATION
 #include "../include/glad/glad.h"
 #include "shaders/Shader.h"
 #include "textures/Texture.h"
 #include "window_functions/window_functions.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <cstdlib>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>

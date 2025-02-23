@@ -1,5 +1,6 @@
 #include "Texture.h"
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 unsigned int loadTexture(const char *texturePath) {
   // Initialize the texture
   unsigned int texture;
