@@ -1,8 +1,8 @@
 #include "../../include/glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <stdint.h>
-#ifndef WINDOW_CALLBACKS
-#define WINDOW_CALLBACKS
+#ifndef WINDOW_FUNCTIONS
+#define WINDOW_FUNCTIONS
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,4 +13,4 @@ void process_input(GLFWwindow *window);
 #ifdef __cplusplus
 }
 #endif
-#endif // !WINDOW_CALLBACKS
+#endif // !WINDOW_FUNCTIONS
