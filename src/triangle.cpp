@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/glad/glad.h"
 #include "shaders/Shader.h"
-#include "stb_image.h"
+#include "textures/Texture.h"
 #include "window_functions/window_functions.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
@@ -12,9 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
-#include <iostream>
 #include <math.h>
-#include <ostream>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -34,30 +32,8 @@ int main(int argc, char *argv[]) {
 
   GLFWwindow *window = create_window(1920, 1080);
   // Initialize the texture
-  unsigned int texture;
-  glGenTextures(1, &texture);
+  unsigned int texture = loadTexture(texturePath);
   glBindTexture(GL_TEXTURE_2D, texture);
-  // set the texture wrapping/filtering options (on the currently bound texture
-  // object)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  // load and generate the texture
-  int texture_width, texture_height, nrChannels;
-  unsigned char *data =
-      stbi_load(texturePath, &texture_width, &texture_height, &nrChannels, 0);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width, texture_height, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-    exit(1);
-  }
-  stbi_image_free(data);
-
   float side_length = 1.0f;
   float height = sqrt(3) / 2 * side_length;
   float offsetY = height / 3.0f; // Centering the triangle
