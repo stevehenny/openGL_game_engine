@@ -1,7 +1,9 @@
 #include "Shape.h"
+#include "Shader.h"
 #include <stdexcept>
 
-Shape::Shape(unsigned int VAO, unsigned int VBO) : VAO(VAO), VBO(VBO) {}
+Shape::Shape(unsigned int VAO, unsigned int VBO, Shader shader)
+    : VAO(VAO), VBO(VBO), shader(shader) {}
 
 Shape::~Shape() {
   glDeleteBuffers(1, &VBO);

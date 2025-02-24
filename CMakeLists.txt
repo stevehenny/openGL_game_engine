@@ -3,13 +3,15 @@ project(openGL_game_engine LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_BUILD_TYPE Release)
-
-# Enable export of compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Optionally, specify OpenGL include directories if needed
-# find_package(OpenGL REQUIRED)
-# include_directories(${OPENGL_INCLUDE_DIRS})
+# Add include directories
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/shaders)
+include_directories(${CMAKE_SOURCE_DIR}/src/window_functions)
+include_directories(${CMAKE_SOURCE_DIR}/src/textures)
+include_directories(${CMAKE_SOURCE_DIR}/src/objects)
 
-# Add subdirectory for src (our main target and other libraries)
+# Add src as a subdirectory
 add_subdirectory(src)

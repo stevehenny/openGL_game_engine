@@ -1,9 +1,0 @@
-CompileFlags:
-  Add: [
-    "-Xclang", "-Iinclude",
-    "-Xclang", "-Isrc",
-    "-Xclang", "-Isrc/objects",
-    "-Xclang", "-Isrc/shaders",
-    "-Xclang", "-Isrc/textures",
-    "-Xclang", "-Isrc/window_functions"
-  ]

@@ -1,8 +1,8 @@
-#include "objects/Triangle.h"
-#include "../include/glad/glad.h"
-#include "shaders/Shader.h"
-#include "textures/Texture.h"
-#include "window_functions/window_functions.h"
+#include "Triangle.h"
+#include "Shader.h"
+#include "Texture.h"
+#include "glad/glad.h"
+#include "window_functions.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <cstdlib>
@@ -48,10 +48,11 @@ int main(int argc, char *argv[]) {
       0.0f, // Top
   };
   unsigned int VAO, VBO;
-  Triangle triangle = Triangle(VAO, VBO, vertices);
+
+  Shader ourShader(vertexShaderPath, fragmentShaderPath);
+  Triangle triangle = Triangle(VAO, VBO, vertices, ourShader);
 
   // Initialize Shader object using runtime arguments for shader paths
-  Shader ourShader(vertexShaderPath, fragmentShaderPath);
   ourShader.useShader();
   glUniform1i(glGetUniformLocation(ourShader.ID, "outTexture"), VAO);
   triangle.draw();

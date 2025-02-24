@@ -7,10 +7,8 @@
 class EngineObject {
 
 protected:
-  virtual void moveLeft(int delta_x) = 0;
-  virtual void moveRight(int delta_x) = 0;
-  virtual void moveUp(int delta_y) = 0;
-  virtual void moveDown(int delta_y) = 0;
+  virtual void moveHorizontally(int delta_x) = 0;
+  virtual void moveVertically(int delta_Y) = 0;
   virtual void rotateClockwise() = 0;
   virtual void rotateCounterClockwise() = 0;
 };
