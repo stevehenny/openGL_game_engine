@@ -1,10 +1,5 @@
 #include "Triangle.h"
-#include <glm/ext/matrix_float4x4.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/trigonometric.hpp>
+#include <algorithm>
 #include <math.h>
 Triangle::Triangle(unsigned int VAO, unsigned int VBO,
                    const float *inputVertices, Shader shader,
@@ -19,7 +14,13 @@ void Triangle::generateVertices(const float *inputVertices, size_t count) {
   vertices.assign(inputVertices, inputVertices + count);
 }
 
-void Triangle::draw() const {
+void Triangle::draw() {
+  shader.useShader();
+  // Send the current transform to the shader
+  int transformLoc = glGetUniformLocation(shader.ID, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
+                     glm::value_ptr(currentTransform));
+
   glBindVertexArray(VAO);
   glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 8);
   glBindVertexArray(0);
@@ -37,28 +38,30 @@ void Triangle::rotateClockwise() {
   float timeValue = glfwGetTime();
   float angle = timeValue;
   glm::mat4 transform = glm::mat4(1.0f);
-  transform =
+  currentTransform =
       glm::rotate(transform, angle,
                   glm::vec3(0.0f, 0.0f, averageSideLength * sqrt(3.0f) / 3));
 
   int transformLoc = glGetUniformLocation(shader.ID, "transform");
-  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
+                     glm::value_ptr(currentTransform));
+  draw();
 }
 
 void Triangle::rotateCounterClockwise() {
 
   shader.useShader();
   float timeValue = glfwGetTime();
-  float angle =
-      timeValue; // or another value representing your desired rotation speed
-  // Use a negative angle for counter-clockwise rotation.
+  float angle = timeValue;
   glm::mat4 transform = glm::mat4(1.0f);
-  transform =
+  currentTransform =
       glm::rotate(transform, -angle,
                   glm::vec3(0.0f, 0.0f, averageSideLength * sqrt(3.0f) / 3));
 
   int transformLoc = glGetUniformLocation(shader.ID, "transform");
-  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
+                     glm::value_ptr(currentTransform));
+  draw();
 }
 
 // Compute the average triagle side length

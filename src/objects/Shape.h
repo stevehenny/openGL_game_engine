@@ -21,7 +21,7 @@ public:
         unsigned int texture);
   virtual ~Shape();
   void setup();
-  virtual void draw() const = 0;
+  virtual void draw() = 0;
 };
 
 #endif // !SHAPE_H

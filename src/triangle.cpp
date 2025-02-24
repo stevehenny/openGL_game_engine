@@ -61,9 +61,7 @@ int main(int argc, char *argv[]) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     triangle.rotateClockwise();
-    triangle.draw();
     triangle2.rotateCounterClockwise();
-    triangle2.draw();
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);
