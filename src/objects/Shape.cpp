@@ -2,8 +2,9 @@
 #include "Shader.h"
 #include <stdexcept>
 
-Shape::Shape(unsigned int VAO, unsigned int VBO, Shader shader)
-    : VAO(VAO), VBO(VBO), shader(shader) {}
+Shape::Shape(unsigned int VAO, unsigned int VBO, Shader shader,
+             unsigned int texture)
+    : VAO(VAO), VBO(VBO), shader(shader), texture(texture) {}
 
 Shape::~Shape() {
   glDeleteBuffers(1, &VBO);
@@ -15,6 +16,11 @@ void Shape::setup() {
     throw std::runtime_error("ERROR:DID NOT GENERATE VERTICES");
     return;
   }
+
+  // load shader and texture to object
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glUniform1i(glGetUniformLocation(shader.ID, "outTexture"), VAO);
+
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
