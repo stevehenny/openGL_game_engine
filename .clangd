@@ -1,3 +1,9 @@
-
 CompileFlags:
-  Add: [-I./include/ -I./include/glad/ -I./src/shaders/ -I./src/window_functions/ -I./src/textures/]
+  Add: [
+    "-Xclang", "-Iinclude",
+    "-Xclang", "-Isrc",
+    "-Xclang", "-Isrc/objects",
+    "-Xclang", "-Isrc/shaders",
+    "-Xclang", "-Isrc/textures",
+    "-Xclang", "-Isrc/window_functions"
+  ]

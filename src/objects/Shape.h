@@ -2,14 +2,17 @@
 #define SHAPE_H
 
 #include "../../include/glad/glad.h"
+#include "EngineObject.h"
+#include "shaders/Shader.h"
 #include <GLFW/glfw3.h>
 #include <vector>
 using namespace std;
-class Shape {
+class Shape : public EngineObject {
 
 protected:
   vector<float> vertices;
   unsigned int VAO, VBO;
+  Shader shader;
 
 public:
   Shape(unsigned int VAO, unsigned int VBO);
