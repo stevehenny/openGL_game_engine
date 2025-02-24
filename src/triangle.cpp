@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
 
   unsigned int texture = loadTexture(texturePath);
   Shader ourShader = Shader(vertexShaderPath, fragmentShaderPath);
-  Triangle triangle = Triangle(VAO, VBO, vertices, ourShader, texture);
-  Triangle triangle2 = Triangle(VAO2, VBO2, vertices, ourShader, texture);
+  Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
+  Triangle *triangle2 = new Triangle(VAO2, VBO2, vertices, ourShader, texture);
   // Main render loop
   while (!glfwWindowShouldClose(window)) {
     // Input handling
@@ -60,17 +60,15 @@ int main(int argc, char *argv[]) {
     // Rendering commands
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    triangle.rotateClockwise();
-    triangle2.rotateCounterClockwise();
+    triangle->rotateClockwise();
+    triangle2->rotateCounterClockwise();
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-
-  // Cleanup
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
+  delete triangle;
+  delete triangle2;
 
   glfwTerminate();
   return 0;

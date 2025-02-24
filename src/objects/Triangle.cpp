@@ -1,5 +1,5 @@
 #include "Triangle.h"
-#include <algorithm>
+#include "Shape.h"
 #include <math.h>
 Triangle::Triangle(unsigned int VAO, unsigned int VBO,
                    const float *inputVertices, Shader shader,
@@ -8,6 +8,11 @@ Triangle::Triangle(unsigned int VAO, unsigned int VBO,
   generateVertices(inputVertices, 24);
   computeAverageTriangleSide(inputVertices);
   setup();
+}
+
+Triangle::~Triangle() {
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
 }
 
 void Triangle::generateVertices(const float *inputVertices, size_t count) {

@@ -25,7 +25,7 @@ protected:
 public:
   Triangle(unsigned int VAO, unsigned int VBO, const float *inputVertices,
            Shader shader, unsigned int texture);
-  ~Triangle() = default;
+  ~Triangle();
   void draw() override;
   void moveHorizontally(int delta_x) override;
   void moveVertically(int delta_y) override;
