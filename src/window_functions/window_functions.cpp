@@ -1,5 +1,5 @@
 #include "window_functions.h"
-#include "Square.h"
+#include "EngineObject.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
@@ -46,14 +46,14 @@ void process_window_input(GLFWwindow *window) {
   }
 }
 
-void process_object_input(GLFWwindow *window, Square *square) {
-  // square->moveHorizontally(0.01);
+void process_object_input(GLFWwindow *window, EngineObject *object) {
+  // object->moveHorizontally(0.01);
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    square->moveVertically(0.01);
+    object->moveVertically(0.01);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    square->moveVertically(-0.01);
+    object->moveVertically(-0.01);
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    square->moveHorizontally(-0.01);
+    object->moveHorizontally(-0.01);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    square->moveHorizontally(0.01);
+    object->moveHorizontally(0.01);
 }
