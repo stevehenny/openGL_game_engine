@@ -31,9 +31,9 @@ void Triangle::draw() {
   glBindVertexArray(0);
 }
 
-void Triangle::moveHorizontally(int delta_x) {}
+void Triangle::moveHorizontally(float delta_x) {}
 
-void Triangle::moveVertically(int delta_y) {}
+void Triangle::moveVertically(float delta_y) {}
 
 // does not draw the new triangle locations
 // need to call draw after this tranformation

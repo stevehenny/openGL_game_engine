@@ -1,4 +1,6 @@
 #include "window_functions.h"
+#include "Square.h"
+#include <GLFW/glfw3.h>
 #include <stdio.h>
 
 GLFWwindow *create_window(uint16_t x, uint16_t y) {
@@ -38,8 +40,20 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-void process_input(GLFWwindow *window) {
+void process_window_input(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
+}
+
+void process_object_input(GLFWwindow *window, Square *square) {
+  square->moveHorizontally(0.01);
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    square->moveVertically(0.01);
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    square->moveVertically(-0.01);
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    square->moveHorizontally(-0.01);
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    square->moveHorizontally(0.01);
 }

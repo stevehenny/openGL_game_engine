@@ -31,9 +31,27 @@ void Square::draw() {
   glBindVertexArray(0);
 }
 
-void Square::moveHorizontally(int delta_x) {}
+void Square::moveHorizontally(float delta_x) {
+  shader.useShader();
+  glm::mat4 transform = glm::mat4(1.0f);
+  currentTransform =
+      glm::translate(currentTransform, glm::vec3(delta_x, 0.0f, 0.0f));
+  int transformLoc = glGetUniformLocation(shader.ID, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
+                     glm::value_ptr(currentTransform));
+  draw();
+}
 
-void Square::moveVertically(int delta_y) {}
+void Square::moveVertically(float delta_y) {
+  shader.useShader();
+  glm::mat4 transform = glm::mat4(1.0f);
+  currentTransform =
+      glm::translate(currentTransform, glm::vec3(0.0f, delta_y, 0.0f));
+  int transformLoc = glGetUniformLocation(shader.ID, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
+                     glm::value_ptr(currentTransform));
+  draw();
+}
 
 void Square::rotateClockwise() {
   shader.useShader();

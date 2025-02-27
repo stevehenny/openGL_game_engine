@@ -27,8 +27,8 @@ public:
            Shader shader, unsigned int texture);
   ~Triangle();
   void draw() override;
-  void moveHorizontally(int delta_x) override;
-  void moveVertically(int delta_y) override;
+  void moveHorizontally(float delta_x) override;
+  void moveVertically(float delta_y) override;
   void rotateClockwise() override;
   void rotateCounterClockwise() override;
   void computeAverageTriangleSide(const float *inputVertices);

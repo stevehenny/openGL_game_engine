@@ -6,9 +6,9 @@
 // inherited and have child classes be forced to implement these functions
 class EngineObject {
 
-protected:
-  virtual void moveHorizontally(int delta_x) = 0;
-  virtual void moveVertically(int delta_Y) = 0;
+public:
+  virtual void moveHorizontally(float delta_x) = 0;
+  virtual void moveVertically(float delta_Y) = 0;
   virtual void rotateClockwise() = 0;
   virtual void rotateCounterClockwise() = 0;
 };

@@ -55,31 +55,33 @@ int main(int argc, char *argv[]) {
       0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // Top right
   };
 
-  unsigned int VAO, VBO, VAO2, VBO2, VAO3, VBO3;
+  unsigned int VAO, VBO;
 
   unsigned int texture = loadTexture(texturePath);
   Shader ourShader = Shader(vertexShaderPath, fragmentShaderPath);
-  Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
-  Triangle *triangle2 = new Triangle(VAO2, VBO2, vertices, ourShader, texture);
-  Square *square = new Square(VAO3, VBO3, squareVertices, ourShader, texture);
+  // Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
+  // Triangle *triangle2 = new Triangle(VAO, VBO, vertices, ourShader, texture);
+  Square *square = new Square(VAO, VBO, squareVertices, ourShader, texture);
   // Main render loop
   while (!glfwWindowShouldClose(window)) {
     // Input handling
-    process_input(window);
-
+    process_window_input(window);
+    process_object_input(window, square);
+    square->draw();
     // Rendering commands
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    triangle->rotateClockwise();
-    triangle2->rotateCounterClockwise();
-    square->rotateCounterClockwise();
+    // triangle->rotateClockwise();
+    // triangle2->rotateCounterClockwise();
+    // square->rotateCounterClockwise();
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-  delete triangle;
-  delete triangle2;
+  // delete triangle;
+  // delete triangle2;
+  delete square;
 
   glfwTerminate();
   return 0;
