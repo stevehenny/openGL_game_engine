@@ -59,28 +59,30 @@ int main(int argc, char *argv[]) {
 
   unsigned int texture = loadTexture(texturePath);
   Shader ourShader = Shader(vertexShaderPath, fragmentShaderPath);
-  // Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
-  // Triangle *triangle2 = new Triangle(VAO, VBO, vertices, ourShader, texture);
+  Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
+  Triangle *triangle2 = new Triangle(VAO, VBO, vertices, ourShader, texture);
   Square *square = new Square(VAO, VBO, squareVertices, ourShader, texture);
   // Main render loop
   while (!glfwWindowShouldClose(window)) {
     // Input handling
     process_window_input(window);
     process_object_input(window, square);
-    square->draw();
     // Rendering commands
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    // triangle->rotateClockwise();
-    // triangle2->rotateCounterClockwise();
-    // square->rotateCounterClockwise();
+
+    float timeValue = glfwGetTime();
+    float angle = glm::radians(-1.0f); // Rotate by -1 degrees
+    triangle->rotateClockwise(angle);
+    triangle2->rotateCounterClockwise(angle);
+    square->rotateCounterClockwise(angle);
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-  // delete triangle;
-  // delete triangle2;
+  delete triangle;
+  delete triangle2;
   delete square;
 
   glfwTerminate();

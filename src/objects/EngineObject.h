@@ -9,8 +9,9 @@ class EngineObject {
 public:
   virtual void moveHorizontally(float delta_x) = 0;
   virtual void moveVertically(float delta_Y) = 0;
-  virtual void rotateClockwise() = 0;
-  virtual void rotateCounterClockwise() = 0;
+  virtual void rotateClockwise(float angle) = 0;
+  virtual void rotateCounterClockwise(float angle) = 0;
+  virtual void updateBuffer() = 0;
 };
 
 #endif // !ENGINE_OBJECT_H

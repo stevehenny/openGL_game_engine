@@ -22,8 +22,9 @@ public:
   void draw() override;
   void moveHorizontally(float delta_x) override;
   void moveVertically(float delta_y) override;
-  void rotateClockwise();
-  void rotateCounterClockwise();
+  void updateBuffer() override;
+  void rotateClockwise(float angle) override;
+  void rotateCounterClockwise(float angle) override;
 
 private:
   void generateVertices(const float *inputVertices, size_t count);

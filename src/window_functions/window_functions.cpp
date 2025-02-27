@@ -47,7 +47,7 @@ void process_window_input(GLFWwindow *window) {
 }
 
 void process_object_input(GLFWwindow *window, Square *square) {
-  square->moveHorizontally(0.01);
+  // square->moveHorizontally(0.01);
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     square->moveVertically(0.01);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
