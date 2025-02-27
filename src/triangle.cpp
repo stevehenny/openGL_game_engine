@@ -1,5 +1,6 @@
 #include "Triangle.h"
 #include "Shader.h"
+#include "Square.h"
 #include "Texture.h"
 #include "glad/glad.h"
 #include "window_functions.h"
@@ -46,12 +47,21 @@ int main(int argc, char *argv[]) {
       0.0f, // Top
   };
 
-  unsigned int VAO, VBO, VAO2, VBO2;
+  float squareVertices[] = {
+      // Positions          // Colors          // Texture Coords
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Bottom left
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Bottom right
+      -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // Top left
+      0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // Top right
+  };
+
+  unsigned int VAO, VBO, VAO2, VBO2, VAO3, VBO3;
 
   unsigned int texture = loadTexture(texturePath);
   Shader ourShader = Shader(vertexShaderPath, fragmentShaderPath);
   Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
   Triangle *triangle2 = new Triangle(VAO2, VBO2, vertices, ourShader, texture);
+  Square *square = new Square(VAO3, VBO3, squareVertices, ourShader, texture);
   // Main render loop
   while (!glfwWindowShouldClose(window)) {
     // Input handling
@@ -62,6 +72,7 @@ int main(int argc, char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT);
     triangle->rotateClockwise();
     triangle2->rotateCounterClockwise();
+    square->rotateCounterClockwise();
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);

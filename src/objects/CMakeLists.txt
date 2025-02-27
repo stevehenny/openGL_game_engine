@@ -1,4 +1,4 @@
-add_library(objects Shape.cpp Triangle.cpp)
+add_library(objects Shape.cpp Triangle.cpp Square.cpp)
 
 
 
