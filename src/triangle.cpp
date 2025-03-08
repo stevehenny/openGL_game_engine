@@ -49,10 +49,10 @@ int main(int argc, char *argv[]) {
 
   float squareVertices[] = {
       // Positions          // Colors          // Texture Coords
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Bottom left
-      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Bottom right
-      -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // Top left
-      0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // Top right
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom left
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // Bottom right
+      -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top left
+      0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f  // Top right
   };
 
   unsigned int VAO, VBO;
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     float angle = glm::radians(-1.0f); // Rotate by -1 degrees
     triangle->rotateClockwise(angle);
     triangle2->rotateCounterClockwise(angle);
-    square->rotateCounterClockwise(angle);
+    square->draw();
 
     // Swap buffers and poll IO events
     glfwSwapBuffers(window);
