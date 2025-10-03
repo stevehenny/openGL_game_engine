@@ -14,6 +14,11 @@ add_executable(openGL_game_engine
     glad.c
 )
 
+add_executable(transformations
+  transformations.cpp
+  glad.c
+)
+
 # Set OpenGL preference to GLVND
 cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -23,3 +28,7 @@ find_package(OpenGL REQUIRED)
 
 # Link libraries
 target_link_libraries(openGL_game_engine OpenGL::GL glfw dl m shaders window_functions textures objects)
+
+
+
+target_link_libraries(transformations OpenGL::GL glfw dl m shaders window_functions textures objects)

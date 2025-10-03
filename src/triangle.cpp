@@ -9,10 +9,12 @@
 #include <cstdlib>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
+#include <iostream>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     float timeValue = glfwGetTime();
-    float angle = glm::radians(-1.0f); // Rotate by -1 degrees
+    float angle = glm::radians(-1.0f);
     triangle->rotateClockwise(angle);
     triangle2->rotateCounterClockwise(angle);
     square->draw();
