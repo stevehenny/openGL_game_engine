@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
 
   float vertices[] = {
       // positions             // colors         //textures
-      0.5f,  -offsetY,         0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+      0.5f,  -offsetY,         0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
       1.0f, // Bottom right
-      -0.5f, -offsetY,         0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+      -0.5f, -offsetY,         0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
       1.0f, // Bottom left
-      0.0f,  height - offsetY, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f,
+      0.0f,  height - offsetY, 0.0f, 1.0f, 1.0f, 1.0f, 0.5f,
       0.0f, // Top
   };
 
