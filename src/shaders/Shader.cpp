@@ -76,7 +76,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath) {
     exit(EXIT_FAILURE);
   }
 
-  // Shader Program
+  // Link Shader Program
   ID = glCreateProgram();
   glAttachShader(ID, vertex);
   glAttachShader(ID, fragment);
