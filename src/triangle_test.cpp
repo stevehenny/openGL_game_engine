@@ -16,10 +16,10 @@ int main(int argc, char *argv[]) {
 
   float d3_verts[] = {
       // pos                // colors
-      0.0f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, // point 1
-      -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f, // point 2
-      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f, // point 3
-      0.0f,  -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // point 4
+      0.0f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, // point 1
+      -0.5f, -0.5f, 0.5f,  1.0f, 1.0f, 1.0f, // point 2
+      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, // point 3
+      0.0f,  -0.5f, -0.5f, 0.0f, 0.0f, 0.0f  // point 4
   };
 
   unsigned int indices[] = {
@@ -61,14 +61,6 @@ int main(int argc, char *argv[]) {
 
   Shader shader = Shader(argv[1], argv[2]);
 
-  // glm::mat4 transform = glm::mat4(1.0f); // identity
-  // transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-  // transform =
-  //     glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f,
-  //     0.0f));
-  // shader.useShader();
-  // shader.setMat4("transform", transform);
-  //
   glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(window)) {
@@ -77,11 +69,12 @@ int main(int argc, char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 transform = glm::mat4(1.0f); // identity
-    // transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::vec4 colorTransform = glm::vec4(float(glfwGetTime()));
     transform = glm::rotate(transform, (float)glfwGetTime(),
                             glm::vec3(0.0f, 1.0f, 0.0f));
     shader.useShader();
     shader.setMat4("transform", transform);
+    // shader.setVec4("colorTransform", colorTransform);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
