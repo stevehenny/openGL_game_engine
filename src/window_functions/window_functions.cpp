@@ -57,3 +57,16 @@ void process_object_input(GLFWwindow *window, EngineObject *object) {
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     object->moveHorizontally(0.01);
 }
+
+void process_camera_movement(GLFWwindow *window, glm::mat4 &view) {
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.01f));
+
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.01f));
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    view = glm::translate(view, glm::vec3(-0.01f, 0.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    view = glm::translate(view, glm::vec3(0.01f, 0.0f, 0.0f));
+}

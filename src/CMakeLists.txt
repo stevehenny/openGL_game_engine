@@ -24,6 +24,12 @@ add_executable(triangle_test
   glad.c
 )
 
+add_executable(camera_translations
+  camera_translations.cpp 
+  glad.c
+)
+
+
 # Set OpenGL preference to GLVND
 cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -37,4 +43,5 @@ target_link_libraries(openGL_game_engine OpenGL::GL glfw dl m shaders window_fun
 
 
 target_link_libraries(transformations OpenGL::GL glfw dl m shaders window_functions textures objects)
+target_link_libraries(camera_translations OpenGL::GL glfw dl m shaders window_functions textures objects)
 target_link_libraries(triangle_test OpenGL::GL glfw dl m shaders window_functions textures objects)
