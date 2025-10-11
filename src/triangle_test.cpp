@@ -69,12 +69,12 @@ int main(int argc, char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 transform = glm::mat4(1.0f); // identity
-    glm::vec4 colorTransform = glm::vec4(float(glfwGetTime()));
+    glm::mat4 colorTransform = glm::mat4(1.0f);
     transform = glm::rotate(transform, (float)glfwGetTime(),
                             glm::vec3(0.0f, 1.0f, 0.0f));
     shader.useShader();
     shader.setMat4("transform", transform);
-    // shader.setVec4("colorTransform", colorTransform);
+    shader.setMat4("colorTransform", transform);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
