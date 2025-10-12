@@ -178,8 +178,13 @@ int main(int argc, char *argv[]) {
   glEnable(GL_DEPTH_TEST);
 
   // create view matrix
-  glm::mat4 view = glm::mat4(1.0f);
-  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+  // glm::mat4 view = glm::mat4(1.0f);
+  // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+  // glm::mat4 view;
+  // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f,
+  // 0.0f),
+  //                    glm::vec3(0.0f, 1.0f, 0.0f));
+  const float radius = 10.0f;
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -196,16 +201,20 @@ int main(int argc, char *argv[]) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
-    // process camera movement
-    process_camera_movement(window, view);
-
+    // // process camera movement
+    // process_camera_movement(window, view);
+    glm::mat4 view = glm::mat4(1.0f);
+    float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+    float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+    view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f),
+                       glm::vec3(0.0f, 1.0f, 0.0f));
+    ourShader.setMat4("view", view);
     glm::mat4 projection =
         glm::perspective(glm::radians(50.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
     ourShader.useShader();
 
     ourShader.setInt("outTexture", 0);
     // ourShader.setMat4("model", model);
-    ourShader.setMat4("view", view);
     ourShader.setMat4("projection", projection);
 
     // render container
