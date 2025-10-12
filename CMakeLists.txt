@@ -12,5 +12,14 @@ include_directories(${CMAKE_SOURCE_DIR}/src/window_functions)
 include_directories(${CMAKE_SOURCE_DIR}/src/textures)
 include_directories(${CMAKE_SOURCE_DIR}/src/objects)
 
+find_package(glm REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
+
+# Set OpenGL preference to GLVND
+cmake_policy(SET CMP0072 NEW)
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL)
+
 # Add src as a subdirectory
 add_subdirectory(src)

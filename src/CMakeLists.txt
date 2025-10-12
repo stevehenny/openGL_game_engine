@@ -34,14 +34,12 @@ add_executable(camera_translations
 cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
 
-# Find OpenGL package
-find_package(OpenGL REQUIRED)
 
 # Link libraries
-target_link_libraries(openGL_game_engine OpenGL::GL glfw dl m shaders window_functions textures objects)
+target_link_libraries(openGL_game_engine glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
 
 
 
-target_link_libraries(transformations OpenGL::GL glfw dl m shaders window_functions textures objects)
-target_link_libraries(camera_translations OpenGL::GL glfw dl m shaders window_functions textures objects)
-target_link_libraries(triangle_test OpenGL::GL glfw dl m shaders window_functions textures objects)
+target_link_libraries(transformations glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
+target_link_libraries(camera_translations glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
+target_link_libraries(triangle_test glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)

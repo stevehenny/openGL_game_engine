@@ -196,11 +196,6 @@ int main(int argc, char *argv[]) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
-    // glm::mat4 model = glm::mat4(1.0f);
-    // model =
-    //     glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.4f, 0.8f,
-    //     -0.4f));
-
     // process camera movement
     process_camera_movement(window, view);
 
@@ -224,8 +219,6 @@ int main(int argc, char *argv[]) {
       ourShader.setMat4("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-    // glDrawArrays(GL_TRIANGLES, 0, 36);
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)

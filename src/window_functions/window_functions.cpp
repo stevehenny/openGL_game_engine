@@ -62,11 +62,18 @@ void process_camera_movement(GLFWwindow *window, glm::mat4 &view) {
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.01f));
-
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.01f));
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    view = glm::translate(view, glm::vec3(-0.01f, 0.0f, 0.0f));
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     view = glm::translate(view, glm::vec3(0.01f, 0.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    view = glm::translate(view, glm::vec3(-0.01f, 0.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    view = glm::rotate(view, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    view = glm::rotate(view, glm::radians(-1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    view = glm::rotate(view, glm::radians(-1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    view = glm::rotate(view, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
