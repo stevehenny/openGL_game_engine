@@ -20,10 +20,14 @@
 
 #include <iostream>
 
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 using namespace std;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, glm::vec3 &cameraPos,
+                  glm::vec3 &cameraFront, glm::vec3 &cameraUp);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -177,20 +181,22 @@ int main(int argc, char *argv[]) {
   // enable depth
   glEnable(GL_DEPTH_TEST);
 
-  // create view matrix
-  // glm::mat4 view = glm::mat4(1.0f);
-  // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-  // glm::mat4 view;
-  // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f,
-  // 0.0f),
-  //                    glm::vec3(0.0f, 1.0f, 0.0f));
+  // create camera system vectors
+  glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+  glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+  glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+  glm::mat4 view;
   const float radius = 10.0f;
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
     // input
     // -----
-    processInput(window);
+    processInput(window, cameraPos, cameraFront, cameraUp);
 
     // render
     // ------
@@ -203,11 +209,12 @@ int main(int argc, char *argv[]) {
 
     // // process camera movement
     // process_camera_movement(window, view);
-    glm::mat4 view = glm::mat4(1.0f);
-    float camX = static_cast<float>(sin(glfwGetTime()) * radius);
-    float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
-    view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f),
-                       glm::vec3(0.0f, 1.0f, 0.0f));
+    // float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+    // float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+    // view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f,
+    // 0.0f),
+    //                    glm::vec3(0.0f, 1.0f, 0.0f));
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     ourShader.setMat4("view", view);
     glm::mat4 projection =
         glm::perspective(glm::radians(50.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
@@ -251,9 +258,21 @@ int main(int argc, char *argv[]) {
 // process all input: query GLFW whether relevant keys are pressed/released this
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window, glm::vec3 &cameraPos,
+                  glm::vec3 &cameraFront, glm::vec3 &cameraUp) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+  const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    cameraPos -=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    cameraPos +=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
