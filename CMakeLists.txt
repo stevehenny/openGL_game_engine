@@ -14,7 +14,13 @@ include_directories(${CMAKE_SOURCE_DIR}/src/objects)
 
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(glm REQUIRED)
+find_package(glm REQUIRED CONFIG)
+find_package(glfw3 REQUIRED)
+if (TARGET glm::glm)
+    message(STATUS "Found glm via CMake config.")
+else()
+    message(FATAL_ERROR "GLM not found")
+endif()
 
 # Set OpenGL preference to GLVND
 cmake_policy(SET CMP0072 NEW)
