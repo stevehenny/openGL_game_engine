@@ -14,20 +14,21 @@
 #include <iostream>
 #include <stb_image.h>
 
+#include "Camera.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <iostream>
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 bool firstMouse = true;
-float yaw = -90.0f; // yaw is initialized to -90.0 degrees since a yaw of 0.0
-                    // results in a direction vector pointing to the right so we
-                    // initially rotate a bit to the left.
-float pitch = 0.0f;
+float camera_yaw =
+    -90.0f; // camera_yaw is initialized to -90.0 degrees since a camera_yaw of
+            // 0.0 results in a direction vector pointing to the right so we
+            // initially rotate a bit to the left.
+float camera_pitch = 0.0f;
 float lastX = 1920.0f / 2.0;
 float lastY = 1080.0f / 2.0;
 float fov = 45.0f;
@@ -79,9 +80,13 @@ int main(int argc, char *argv[]) {
     glfwTerminate();
     return -1;
   }
+
+  Camera camera{cameraPos, cameraFront, cameraUp, 1920.0f,
+                1080.0f,   0.1f,        0.1f,     100.0f};
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetWindowUserPointer(window, &camera);
+  glfwSetCursorPosCallback(window, Camera::mouse_callback);
   glfwSetScrollCallback(window, scroll_callback);
   // tell GLFW to capture our mouse
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -228,10 +233,10 @@ int main(int argc, char *argv[]) {
     // view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f,
     // 0.0f),
     //                    glm::vec3(0.0f, 1.0f, 0.0f));
-    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    view = camera.get_view_matrix();
+
     ourShader.setMat4("view", view);
-    glm::mat4 projection =
-        glm::perspective(glm::radians(50.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+    glm::mat4 projection = camera.get_projection_matrix();
     ourShader.useShader();
 
     ourShader.setInt("outTexture", 0);
@@ -307,19 +312,20 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   xoffset *= sensitivity;
   yoffset *= sensitivity;
 
-  yaw += xoffset;
-  pitch += yoffset;
+  camera_yaw += xoffset;
+  camera_pitch += yoffset;
 
-  // make sure that when pitch is out of bounds, screen doesn't get flipped
-  if (pitch > 89.0f)
-    pitch = 89.0f;
-  if (pitch < -89.0f)
-    pitch = -89.0f;
+  // make sure that when camera_pitch is out of bounds, screen doesn't get
+  // flipped
+  if (camera_pitch > 89.0f)
+    camera_pitch = 89.0f;
+  if (camera_pitch < -89.0f)
+    camera_pitch = -89.0f;
 
   glm::vec3 front;
-  front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  front.y = sin(glm::radians(pitch));
-  front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+  front.x = cos(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
+  front.y = sin(glm::radians(camera_pitch));
+  front.z = sin(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
   cameraFront = glm::normalize(front);
 }
 
