@@ -38,11 +38,6 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 using namespace std;
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-
 // settings
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
@@ -81,13 +76,20 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  Camera camera{cameraPos, cameraFront, cameraUp, 1920.0f,
-                1080.0f,   0.1f,        0.1f,     100.0f};
+  Camera camera{vec3(0.0f, 0.0f, 3.0f),
+                vec3(0.0f, 0.0f, -1.0f),
+                vec3(0.0f, 1.0f, 0.0f),
+                1920.0f,
+                1080.0f,
+                0.1f,
+                0.1f,
+                100.0f,
+                2.5f};
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetWindowUserPointer(window, &camera);
   glfwSetCursorPosCallback(window, Camera::mouse_callback);
-  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetScrollCallback(window, Camera::scroll_callback);
   // tell GLFW to capture our mouse
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -209,13 +211,15 @@ int main(int argc, char *argv[]) {
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
-    float currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+    camera.update_camera_delta_time(glfwGetTime());
+    // float currentFrame = glfwGetTime();
+    // deltaTime = currentFrame - lastFrame;
+    // lastFrame = currentFrame;
 
     // input
     // -----
-    processInput(window);
+    // processInput(window);
+    camera.move_camera(window);
 
     // render
     // ------
@@ -274,70 +278,6 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this
-// frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
-  const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    cameraPos += cameraSpeed * cameraFront;
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    cameraPos -= cameraSpeed * cameraFront;
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    cameraPos -=
-        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    cameraPos +=
-        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-}
-void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
-  float xpos = static_cast<float>(xposIn);
-  float ypos = static_cast<float>(yposIn);
-
-  if (firstMouse) {
-    lastX = xpos;
-    lastY = ypos;
-    firstMouse = false;
-  }
-
-  float xoffset = xpos - lastX;
-  float yoffset =
-      lastY - ypos; // reversed since y-coordinates go from bottom to top
-  lastX = xpos;
-  lastY = ypos;
-
-  float sensitivity = 0.1f; // change this value to your liking
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
-
-  camera_yaw += xoffset;
-  camera_pitch += yoffset;
-
-  // make sure that when camera_pitch is out of bounds, screen doesn't get
-  // flipped
-  if (camera_pitch > 89.0f)
-    camera_pitch = 89.0f;
-  if (camera_pitch < -89.0f)
-    camera_pitch = -89.0f;
-
-  glm::vec3 front;
-  front.x = cos(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
-  front.y = sin(glm::radians(camera_pitch));
-  front.z = sin(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
-  cameraFront = glm::normalize(front);
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-  fov -= (float)yoffset;
-  if (fov < 1.0f)
-    fov = 1.0f;
-  if (fov > 45.0f)
-    fov = 45.0f;
-}
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 // ---------------------------------------------------------------------------------------------
