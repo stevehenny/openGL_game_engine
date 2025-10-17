@@ -91,9 +91,9 @@ void Camera::look_around(double xposIn, double yposIn) {
     camera_pitch = -89.0f;
 
   vec3 front;
-  front.x = cos(radians(camera_yaw)) * cos(radians(camera_pitch));
-  front.y = sin(radians(camera_pitch));
-  front.z = sin(glm::radians(camera_yaw)) * cos(radians(camera_pitch));
+  front.x = cos(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
+  front.y = sin(glm::radians(camera_pitch));
+  front.z = sin(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
   camera_front = normalize(front);
 }
 void Camera::update_camera_delta_time(float current_frame) {

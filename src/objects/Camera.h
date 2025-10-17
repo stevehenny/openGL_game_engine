@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-using namespace glm;
+using glm::vec3, glm::mat4, glm::sin, glm::cos;
 
 class Camera {
 public:
