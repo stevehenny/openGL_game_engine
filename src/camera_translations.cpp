@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, Camera::mouse_callback);
   glfwSetScrollCallback(window, Camera::scroll_callback);
   // tell GLFW to capture our mouse
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
   // glad: load all OpenGL function pointers
   // ---------------------------------------

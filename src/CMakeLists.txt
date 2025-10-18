@@ -1,45 +1,82 @@
+# -----------------------------------------------------------
+# Include project directories
+# -----------------------------------------------------------
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/shaders)
 include_directories(${CMAKE_SOURCE_DIR}/src/window_functions)
 include_directories(${CMAKE_SOURCE_DIR}/src/textures)
 include_directories(${CMAKE_SOURCE_DIR}/src/objects)
 
+# -----------------------------------------------------------
+# Subdirectories for static libraries (shaders, textures, etc.)
+# -----------------------------------------------------------
 add_subdirectory(shaders)
 add_subdirectory(window_functions)
 add_subdirectory(textures)
 add_subdirectory(objects)
 
+# -----------------------------------------------------------
+# Executable targets
+# -----------------------------------------------------------
 add_executable(openGL_game_engine
     triangle.cpp
     glad.c
 )
 
 add_executable(transformations
-  transformations.cpp
-  glad.c
+    transformations.cpp
+    glad.c
 )
 
 add_executable(triangle_test
-  triangle_test.cpp
-  glad.c
+    triangle_test.cpp
+    glad.c
 )
 
 add_executable(camera_translations
-  camera_translations.cpp 
-  glad.c
+    camera_translations.cpp
+    glad.c
 )
 
-
-# Set OpenGL preference to GLVND
+# -----------------------------------------------------------
+# OpenGL preference
+# -----------------------------------------------------------
 cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
 
-
+# -----------------------------------------------------------
 # Link libraries
-target_link_libraries(openGL_game_engine glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
+# (Order matters! glfw after your own libs)
+# -----------------------------------------------------------
+set(COMMON_LIBS
+    glm::glm
+    OpenGL::GL
+    shaders
+    window_functions
+    textures
+    objects
+    glfw
+)
 
+target_link_libraries(openGL_game_engine PRIVATE ${COMMON_LIBS})
+target_link_libraries(transformations PRIVATE ${COMMON_LIBS})
+target_link_libraries(triangle_test PRIVATE ${COMMON_LIBS})
+target_link_libraries(camera_translations PRIVATE ${COMMON_LIBS})
 
+# -----------------------------------------------------------
+# Platform-specific linking
+# -----------------------------------------------------------
+if(WIN32)
+    # Link against required Win32 system libs
+    target_link_libraries(openGL_game_engine PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(transformations PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(triangle_test PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(camera_translations PRIVATE opengl32 user32 gdi32 shell32)
+else()
+    # Link against dl on Linux / WSL
+    target_link_libraries(openGL_game_engine PRIVATE dl m)
+    target_link_libraries(transformations PRIVATE dl m)
+    target_link_libraries(triangle_test PRIVATE dl m)
+    target_link_libraries(camera_translations PRIVATE dl m)
+endif()
 
-target_link_libraries(transformations glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
-target_link_libraries(camera_translations glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
-target_link_libraries(triangle_test glm::glm OpenGL::GL glfw dl m shaders window_functions textures objects)
