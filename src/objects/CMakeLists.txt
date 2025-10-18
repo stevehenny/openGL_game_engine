@@ -1,3 +1,2 @@
 add_library(objects Shape.cpp Triangle.cpp Square.cpp Camera.cpp)
-include_directories(${SOURCE_DIR}/shaders)
-target_link_libraries(objects PRIVATE glm::glm)
+target_link_libraries(objects PRIVATE glm::glm shaders)

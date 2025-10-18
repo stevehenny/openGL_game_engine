@@ -38,6 +38,11 @@ add_executable(camera_translations
     glad.c
 )
 
+add_executable(light_source 
+    light_source.cpp
+    glad.c
+)
+
 # -----------------------------------------------------------
 # OpenGL preference
 # -----------------------------------------------------------
@@ -62,6 +67,7 @@ target_link_libraries(openGL_game_engine PRIVATE ${COMMON_LIBS})
 target_link_libraries(transformations PRIVATE ${COMMON_LIBS})
 target_link_libraries(triangle_test PRIVATE ${COMMON_LIBS})
 target_link_libraries(camera_translations PRIVATE ${COMMON_LIBS})
+target_link_libraries(light_source PRIVATE ${COMMON_LIBS})
 
 # -----------------------------------------------------------
 # Platform-specific linking
@@ -72,11 +78,15 @@ if(WIN32)
     target_link_libraries(transformations PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(triangle_test PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(camera_translations PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(light_source PRIVATE opengl32 user32 gdi32 shell32)
+
 else()
     # Link against dl on Linux / WSL
     target_link_libraries(openGL_game_engine PRIVATE dl m)
     target_link_libraries(transformations PRIVATE dl m)
     target_link_libraries(triangle_test PRIVATE dl m)
     target_link_libraries(camera_translations PRIVATE dl m)
+    target_link_libraries(light_source PRIVATE dl m)
+
 endif()
 
