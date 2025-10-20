@@ -1,6 +1,5 @@
 #ifndef SHADER_CLASS
 #define SHADER_CLASS
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <string>
 

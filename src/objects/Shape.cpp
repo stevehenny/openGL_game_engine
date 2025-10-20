@@ -1,5 +1,6 @@
 #include "Shape.h"
 #include "Shader.h"
+#include <glad/glad.h>
 #include <stdexcept>
 
 Shape::Shape(unsigned int VAO, unsigned int VBO, Shader shader,

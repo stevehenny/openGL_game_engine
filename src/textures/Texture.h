@@ -1,4 +1,3 @@
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
+#pragma once
 
 unsigned int loadTexture(const char *texturePath);

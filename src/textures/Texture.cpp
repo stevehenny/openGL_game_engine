@@ -1,6 +1,10 @@
 #include "Texture.h"
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 #include <iostream>
+
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 unsigned int loadTexture(const char *texturePath) {
   // Initialize the texture

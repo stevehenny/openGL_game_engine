@@ -1,5 +1,5 @@
-#include "Texture.h"
-#include "glad/glad.h"
+#include "Camera.h"
+#include "Shader.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -17,11 +17,40 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+using glm::vec3, glm::mat4, std::cout;
 constexpr unsigned int SCR_WIDTH = 1920;
 constexpr unsigned int SCR_HEIGHT = 1080;
+static float deltaTime = 0.0f;
+static float lastFrame = 0.0f;
+static vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
 
+static constexpr float vertices[] = {
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
+    -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+    0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f,
+    0.5f,  -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,
+    -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
+    -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f,
+    0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
+    0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
+    -0.5f, 0.5f,  -0.5f,
+};
+
+static constexpr glm::vec3 cube1_pos = glm::vec3(1.0f, 0.0f, 1.0f);
 int main(int argc, char *argv[]) {
 
+  if (argc < 4) {
+    fprintf(stderr, "Usage: %s <vertex_shader_path> <fragment_shader_path> ",
+            argv[0]);
+    return -1;
+  }
+  const char *vertexShaderPath = argv[1];
+  const char *fragmentShaderPath = argv[2];
+  const char *lightShaderPath = argv[3];
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -31,6 +60,16 @@ int main(int argc, char *argv[]) {
   GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT,
                                         "LIGHTING_PRACITCE", nullptr, nullptr);
 
+  Camera camera{vec3(0.0f, 0.0f, 3.0f),
+                vec3(0.0f, 0.0f, -1.0f),
+                vec3(0.0f, 1.0f, 0.0f),
+                1920.0f,
+                1080.0f,
+                0.1f,
+                0.1f,
+                100.0f,
+                2.5f};
+
   if (window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
@@ -38,15 +77,78 @@ int main(int argc, char *argv[]) {
   }
 
   glfwMakeContextCurrent(window);
+  glfwFocusWindow(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetWindowUserPointer(window, &camera);
+  glfwSetCursorPosCallback(window, Camera::mouse_callback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cout << "Faild to initialized GLAD" << '\n';
     return -1;
   }
+
+  // create cube buffers
+  unsigned int cubeVAO, VBO;
+  glGenVertexArrays(1, &cubeVAO);
+
+  glBindVertexArray(cubeVAO);
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  unsigned int lightVAO;
+  glGenVertexArrays(1, &lightVAO);
+  glBindVertexArray(lightVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  // enable depth
+  glEnable(GL_DEPTH_TEST);
+
+  // compile shaders
+  Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
+  Shader lightShader = Shader(vertexShaderPath, lightShaderPath);
+  shader.useShader();
+
   while (!glfwWindowShouldClose(window)) {
-    glfwSwapBuffers(window);
     glfwPollEvents();
+
+    camera.update_camera_delta_time(glfwGetTime());
+    camera.move_camera(window);
+
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    shader.useShader();
+    shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    shader.setVec3("light", 1.0f, 1.0f, 1.0f);
+    shader.setMat4("projection", camera.get_projection_matrix());
+    shader.setMat4("view", camera.get_view_matrix());
+    shader.setMat4("model", glm::translate(mat4(1.0f), cube1_pos));
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    lightShader.useShader();
+    lightShader.setMat4("projection", camera.get_projection_matrix());
+    lightShader.setMat4("view", camera.get_view_matrix());
+    mat4 model = mat4(1.0f);
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, vec3(0.2f));
+    lightShader.setMat4("model", model);
+    glBindVertexArray(lightVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    glfwSwapBuffers(window);
   }
-  glfwDestroyWindow(window);
+  glDeleteVertexArrays(1, &cubeVAO);
+  glDeleteVertexArrays(1, &lightVAO);
+  glDeleteBuffers(1, &VBO);
+  glfwTerminate();
+  return 0;
 }

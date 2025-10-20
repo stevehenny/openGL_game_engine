@@ -3,9 +3,6 @@
 
 #include "EngineObject.h"
 #include "Shader.h"
-#include "Texture.h"
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
 #include <vector>
 using namespace std;
 class Shape : public EngineObject {

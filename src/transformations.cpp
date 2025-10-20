@@ -1,6 +1,4 @@
 #include "Shader.h"
-#include "Texture.h"
-#include "glad/glad.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>

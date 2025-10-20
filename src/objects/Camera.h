@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include "top_level_include.h"
 #include <glm/glm.hpp>
 
 using glm::vec3, glm::mat4, glm::sin, glm::cos;
