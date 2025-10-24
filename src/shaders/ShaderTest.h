@@ -6,8 +6,9 @@
 class ShaderTest {
 public:
   unsigned int ID;
-  ShaderTest(ShaderProgram &vertex, ShaderProgram &fragment);
-  void useShader();
+  ShaderTest(const ShaderProgram &vertex, const ShaderProgram &fragment);
+  ~ShaderTest();
+  void useShader() const;
 
   void setBool(const std::string &name, bool value) const;
   void setInt(const std::string &name, int value) const;

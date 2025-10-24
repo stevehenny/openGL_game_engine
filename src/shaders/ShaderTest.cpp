@@ -1,28 +1,40 @@
-
-
 #include "ShaderTest.h"
-#include "glad/glad.h"
-#include <fstream>
+#include <glad/glad.h>
 #include <iostream>
-#include <sstream>
 
-ShaderTest::ShaderTest(ShaderProgram &vertex, ShaderProgram &fragment) {
+ShaderTest::ShaderTest(const ShaderProgram &vertex,
+                       const ShaderProgram &fragment) {
   ID = glCreateProgram();
+
   glAttachShader(ID, vertex.getBindValue());
-  glAttachShader(ID, vertex.getBindValue());
+  glAttachShader(ID, fragment.getBindValue());
+
+  glLinkProgram(ID); // <--- MANDATORY
 
   int success;
   char infoLog[512];
   glGetProgramiv(ID, GL_LINK_STATUS, &success);
   if (!success) {
-    glGetProgramInfoLog(ID, 512, NULL, infoLog);
+    glGetProgramInfoLog(ID, 512, nullptr, infoLog);
     std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
               << infoLog << std::endl;
-    exit(EXIT_FAILURE);
+    throw std::runtime_error("Shader program linking failed");
+  }
+
+  // Once linked, shaders can be deleted safely
+  glDetachShader(ID, vertex.getBindValue());
+  glDetachShader(ID, fragment.getBindValue());
+}
+
+ShaderTest::~ShaderTest() {
+  if (glIsProgram(ID)) {
+    glDeleteProgram(ID);
   }
 }
-void ShaderTest::useShader() { glUseProgram(ID); }
 
+void ShaderTest::useShader() const { glUseProgram(ID); }
+
+// ---- Uniform setters ----
 void ShaderTest::setBool(const std::string &name, bool value) const {
   glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
@@ -40,6 +52,7 @@ void ShaderTest::setVec2(const std::string &name,
 void ShaderTest::setVec2(const std::string &name, float x, float y) const {
   glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 }
+
 void ShaderTest::setVec3(const std::string &name,
                          const glm::vec3 &value) const {
   glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
@@ -48,6 +61,7 @@ void ShaderTest::setVec3(const std::string &name, float x, float y,
                          float z) const {
   glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 }
+
 void ShaderTest::setVec4(const std::string &name,
                          const glm::vec4 &value) const {
   glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
@@ -56,6 +70,7 @@ void ShaderTest::setVec4(const std::string &name, float x, float y, float z,
                          float w) const {
   glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
+
 void ShaderTest::setMat2(const std::string &name, const glm::mat2 &mat) const {
   glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE,
                      &mat[0][0]);
