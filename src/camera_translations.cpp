@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Cube.h"
 #include "Shader.h"
+#include "ShaderProgram.h"
 #include "Texture.h"
 #include "window_functions.h"
 
@@ -99,7 +100,9 @@ int main(int argc, char *argv[]) {
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader(vertexShaderPath, fragmentShaderPath);
+  Shader ourShader(
+      ShaderProgram{std::string(vertexShaderPath), ShaderTypes::VERTEX},
+      ShaderProgram{std::string(fragmentShaderPath), ShaderTypes::FRAGMENT});
 
   glm::vec3 cubePositions[] = {
       glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),

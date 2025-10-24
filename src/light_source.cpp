@@ -2,7 +2,6 @@
 #include "Cube.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
-#include "ShaderTest.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -132,9 +131,16 @@ int main(int argc, char *argv[]) {
   glEnable(GL_DEPTH_TEST);
 
   // compile shaders
-  Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
-  Shader lightShader = Shader(lightVertPath, lightfragPath);
-  Shader lightShader2 = Shader(lightVertPath, lightfragPath);
+  Shader shader = Shader{
+      ShaderProgram{std::string(vertexShaderPath), ShaderTypes::VERTEX},
+      ShaderProgram{std::string(fragmentShaderPath), ShaderTypes::FRAGMENT}};
+  Shader lightShader =
+      Shader(ShaderProgram{std::string(lightVertPath), ShaderTypes::VERTEX},
+             ShaderProgram{std::string(lightfragPath), ShaderTypes::FRAGMENT});
+  Shader lightShader2 =
+      Shader(ShaderProgram{std::string(lightVertPath), ShaderTypes::VERTEX},
+             ShaderProgram{std::string(lightfragPath), ShaderTypes::FRAGMENT});
+
   shader.useShader();
 
   // TEST SHADER TEST
@@ -142,7 +148,6 @@ int main(int argc, char *argv[]) {
       ShaderProgram(std::string(vertexShaderPath), ShaderTypes::VERTEX);
   ShaderProgram fragment_program(std::string(fragmentShaderPath),
                                  ShaderTypes::FRAGMENT);
-  ShaderTest test1(vertex_program, fragment_program);
 
   float rotationRadius = 2.0f;
   float offset = 1.0f;
@@ -170,16 +175,16 @@ int main(int argc, char *argv[]) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    test1.useShader();
-    test1.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-    test1.setVec3("lightColor", vec3(1.0f, 0.0f, 0.0f));
-    test1.setVec3("lightColor2", vec3(0.0f, 0.0f, 1.0f));
-    test1.setVec3("lightPos2", lightPos2);
-    test1.setMat4("projection", camera.get_projection_matrix());
-    test1.setMat4("view", camera.get_view_matrix());
-    test1.setMat4("model", mat4(1.0f));
-    test1.setVec3("lightPos", lightPos);
-    test1.setVec3("viewPos", camera.get_position());
+    shader.useShader();
+    shader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+    shader.setVec3("lightColor", vec3(1.0f, 0.0f, 0.0f));
+    shader.setVec3("lightColor2", vec3(0.0f, 0.0f, 1.0f));
+    shader.setVec3("lightPos2", lightPos2);
+    shader.setMat4("projection", camera.get_projection_matrix());
+    shader.setMat4("view", camera.get_view_matrix());
+    shader.setMat4("model", mat4(1.0f));
+    shader.setVec3("lightPos", lightPos);
+    shader.setVec3("viewPos", camera.get_position());
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 

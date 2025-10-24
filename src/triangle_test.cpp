@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "ShaderProgram.h"
 #include "glad/glad.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
@@ -59,7 +60,9 @@ int main(int argc, char *argv[]) {
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  Shader shader = Shader(argv[1], argv[2]);
+  Shader shader =
+      Shader(ShaderProgram{std::string(argv[1]), ShaderTypes::VERTEX},
+             ShaderProgram{std::string(argv[2]), ShaderTypes::FRAGMENT});
 
   glEnable(GL_DEPTH_TEST);
 

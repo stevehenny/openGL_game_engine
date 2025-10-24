@@ -1,5 +1,6 @@
 #ifndef SHADER_CLASS
 #define SHADER_CLASS
+#include "ShaderProgram.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -7,10 +8,10 @@ class Shader {
 public:
   unsigned int ID;
   // Constructor for shader
-  Shader(const char *vertexPath, const char *fragmentPath);
-
+  Shader(const ShaderProgram &vertex, const ShaderProgram &fragment);
+  ~Shader();
   // use/activate the shader
-  void useShader();
+  void useShader() const;
 
   // utility functions:
   void setBool(const std::string &name, bool value) const;
