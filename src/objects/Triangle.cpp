@@ -1,6 +1,13 @@
 #include "Triangle.h"
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/trigonometric.hpp>
+
 #include <math.h>
 
 Triangle::Triangle(unsigned int VAO, unsigned int VBO,

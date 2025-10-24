@@ -60,7 +60,9 @@ int main(int argc, char *argv[]) {
   unsigned int VAO, VBO;
 
   unsigned int texture = loadTexture(texturePath);
-  Shader ourShader = Shader(vertexShaderPath, fragmentShaderPath);
+  Shader ourShader = Shader(
+      ShaderProgram{std::string(vertexShaderPath), ShaderTypes::VERTEX},
+      ShaderProgram{std::string(fragmentShaderPath), ShaderTypes::FRAGMENT});
   Triangle *triangle = new Triangle(VAO, VBO, vertices, ourShader, texture);
   Triangle *triangle2 = new Triangle(VAO, VBO, vertices, ourShader, texture);
   Square *square = new Square(VAO, VBO, squareVertices, ourShader, texture);

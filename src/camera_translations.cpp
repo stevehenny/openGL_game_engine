@@ -1,9 +1,13 @@
+#include "Camera.h"
+#include "Cube.h"
 #include "Shader.h"
+#include "ShaderProgram.h"
 #include "Texture.h"
-#include "glad/glad.h"
 #include "window_functions.h"
-#include <GLFW/glfw3.h>
+
 #include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -13,12 +17,6 @@
 #include <glm/trigonometric.hpp>
 #include <iostream>
 #include <stb_image.h>
-
-#include "Camera.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -39,8 +37,8 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 using namespace std;
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+constexpr unsigned int SCR_WIDTH = 1920;
+constexpr unsigned int SCR_HEIGHT = 1080;
 
 int main(int argc, char *argv[]) {
 
@@ -102,7 +100,9 @@ int main(int argc, char *argv[]) {
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader(vertexShaderPath, fragmentShaderPath);
+  Shader ourShader(
+      ShaderProgram{std::string(vertexShaderPath), ShaderTypes::VERTEX},
+      ShaderProgram{std::string(fragmentShaderPath), ShaderTypes::FRAGMENT});
 
   glm::vec3 cubePositions[] = {
       glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
@@ -163,39 +163,7 @@ int main(int argc, char *argv[]) {
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  // load and create a texture
-  // -------------------------
-  unsigned int texture1;
-  // texture 1
-  // ---------
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-
-  // set the texture wrapping parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  // set texture filtering parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  // load image, create texture and generate mipmaps
-  int width, height, nrChannels;
-  // stbi_set_flip_vertically_on_load(
-  //     true); // tell stb_image.h to flip loaded texture's on the y-axis.
-  cout << texturePath << '\n';
-  unsigned char *data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-    exit(1);
-  }
-  stbi_image_free(data);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  // tell opengl for each sampler to which texture unit it belongs to (only has
-  // to be done once)
-  // -------------------------------------------------------------------------------------------
+  unsigned int texture1 = loadTexture(texturePath);
 
   // create model matrix
 
@@ -210,6 +178,8 @@ int main(int argc, char *argv[]) {
   const float radius = 10.0f;
   // render loop
   // -----------
+  //
+  Cube cube{vec3(0.0f, 0.0f, 0.0f), texture1, ourShader};
   while (!glfwWindowShouldClose(window)) {
     camera.update_camera_delta_time(glfwGetTime());
     // float currentFrame = glfwGetTime();
@@ -230,13 +200,7 @@ int main(int argc, char *argv[]) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
-    // // process camera movement
-    // process_camera_movement(window, view);
-    // float camX = static_cast<float>(sin(glfwGetTime()) * radius);
-    // float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
-    // view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f,
-    // 0.0f),
-    //                    glm::vec3(0.0f, 1.0f, 0.0f));
+    cube.draw();
     view = camera.get_view_matrix();
 
     ourShader.setMat4("view", view);
@@ -248,8 +212,9 @@ int main(int argc, char *argv[]) {
     ourShader.setMat4("projection", projection);
 
     // render container
-    glBindVertexArray(VAO);
+    // glBindVertexArray(VAO);
     for (int i{}; i < 10; i++) {
+      glBindVertexArray(VAO);
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
       // float angle = 20.0f * i;

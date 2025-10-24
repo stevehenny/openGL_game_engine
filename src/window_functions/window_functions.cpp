@@ -1,6 +1,8 @@
 #include "window_functions.h"
 #include "EngineObject.h"
-#include <GLFW/glfw3.h>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <stdio.h>
 
 GLFWwindow *create_window(uint16_t x, uint16_t y) {

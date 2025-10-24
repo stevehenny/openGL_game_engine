@@ -3,6 +3,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
+#include <iostream>
 #include <stdexcept>
 
 Camera::Camera(vec3 position, vec3 camera_front, vec3 camera_up,
