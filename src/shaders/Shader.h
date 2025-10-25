@@ -1,32 +1,33 @@
-#ifndef SHADER_CLASS
-#define SHADER_CLASS
-#include "ShaderProgram.h"
+#pragma once
 #include <glm/glm.hpp>
 #include <string>
+
+class ShaderProgram; // forward declaration
 
 class Shader {
 public:
   unsigned int ID;
-  // Constructor for shader
+
   Shader(const ShaderProgram &vertex, const ShaderProgram &fragment);
   ~Shader();
-  // use/activate the shader
+
   void useShader() const;
 
-  // utility functions:
-  void setBool(const std::string &name, bool value) const;
-  void setInt(const std::string &name, int value) const;
-  void setFloat(const std::string &name, float value) const;
-  void setVec2(const std::string &name, const glm::vec2 &value) const;
-  void setVec2(const std::string &name, float x, float y) const;
-  void setVec3(const std::string &name, const glm::vec3 &value) const;
-  void setVec3(const std::string &name, float x, float y, float z) const;
-  void setVec4(const std::string &name, const glm::vec4 &value) const;
-  void setVec4(const std::string &name, float x, float y, float z,
-               float w) const;
-  void setMat2(const std::string &name, const glm::mat2 &mat) const;
-  void setMat3(const std::string &name, const glm::mat3 &mat) const;
-  void setMat4(const std::string &name, const glm::mat4 &mat) const;
-};
+  // ---- Uniform setters by SPIR-V layout location ----
+  void setBool(unsigned int location, bool value) const;
+  void setInt(unsigned int location, int value) const;
+  void setFloat(unsigned int location, float value) const;
 
-#endif // !SHADER_CLASS
+  void setVec2(unsigned int location, const glm::vec2 &value) const;
+  void setVec2(unsigned int location, float x, float y) const;
+
+  void setVec3(unsigned int location, const glm::vec3 &value) const;
+  void setVec3(unsigned int location, float x, float y, float z) const;
+
+  void setVec4(unsigned int location, const glm::vec4 &value) const;
+  void setVec4(unsigned int location, float x, float y, float z, float w) const;
+
+  void setMat2(unsigned int location, const glm::mat2 &mat) const;
+  void setMat3(unsigned int location, const glm::mat3 &mat) const;
+  void setMat4(unsigned int location, const glm::mat4 &mat) const;
+};

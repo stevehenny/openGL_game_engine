@@ -1,19 +1,18 @@
-#version 410 core
-in vec3 Normal;
-in vec3 FragPos;
+#version 460 core
+layout(location = 0) in vec3 Normal;
+layout(location = 1) in vec3 FragPos;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
-uniform vec3 lightPos;
-uniform vec3 viewPos;
+layout(location = 5) uniform vec3 objectColor;
+layout(location = 6) uniform vec3 lightColor;
+layout(location = 7) uniform vec3 lightPos;
+layout(location = 8) uniform vec3 lightColor2;
+layout(location = 9) uniform vec3 lightPos2;
+layout(location = 10) uniform vec3 viewPos;
 
-uniform vec3 lightPos2;
-uniform vec3 lightColor2;
-
-vec3 lightingVec(vec3 lightPos, vec3 lightColor){
-
+vec3 computeLighting(vec3 lightPos, vec3 lightColor)
+{
     float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * lightColor;
 
@@ -29,14 +28,11 @@ vec3 lightingVec(vec3 lightPos, vec3 lightColor){
     vec3 specular = specularStrength * spec * lightColor;
 
     return (ambient + diffuse + specular) * objectColor;
-
 }
 
-
-void main() {
-
-    vec3 result = lightingVec(lightPos, lightColor);
-    result += lightingVec(lightPos2, lightColor2);
+void main()
+{
+    vec3 result = computeLighting(lightPos, lightColor);
+    result += computeLighting(lightPos2, lightColor2);
     FragColor = vec4(result, 1.0);
 }
-

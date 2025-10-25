@@ -3,10 +3,10 @@
     layout (location = 1) in vec3 aColor;
     layout (location = 2) in vec2 aTexCoord;
 
-    out vec3 ourColor;
-    out vec2 TexCoord;
+    layout (location = 3) out vec3 ourColor;
+    layout (location = 4) out vec2 TexCoord;
 
-    uniform mat4 transform; // transformation matrix
+    layout (location = 5) uniform mat4 transform; // transformation matrix
     void main()
     {
      gl_Position = transform * vec4(aPos, 1.0);
