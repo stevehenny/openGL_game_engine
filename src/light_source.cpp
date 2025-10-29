@@ -2,6 +2,7 @@
 #include "Cube.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
+#include "ShaderPrograms.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -145,15 +146,22 @@ int main(int argc, char *argv[]) {
 
   glEnable(GL_DEPTH_TEST);
 
+  std::string SHADERS_FOLDER = getGitRepoRoot() + "/build/src/shaders/spv/";
   // Compile SPIR-V shaders
-  Shader shader{ShaderProgram{vertexShaderPath, ShaderTypes::VERTEX},
-                ShaderProgram{fragmentShaderPath, ShaderTypes::FRAGMENT}};
+  Shader shader{ShaderProgram{SHADERS_FOLDER + "vertex_light.vert.spv",
+                              ShaderTypes::VERTEX},
+                ShaderProgram{SHADERS_FOLDER + "frag_light.frag.spv",
+                              ShaderTypes::FRAGMENT}};
 
-  Shader lightShader{ShaderProgram{lightVertPath, ShaderTypes::VERTEX},
-                     ShaderProgram{lightFragPath, ShaderTypes::FRAGMENT}};
+  Shader lightShader{ShaderProgram{SHADERS_FOLDER + "light_source.vert.spv",
+                                   ShaderTypes::VERTEX},
+                     ShaderProgram{SHADERS_FOLDER + "light_source.frag.spv",
+                                   ShaderTypes::FRAGMENT}};
 
-  Shader lightShader2{ShaderProgram{lightVertPath, ShaderTypes::VERTEX},
-                      ShaderProgram{lightFragPath, ShaderTypes::FRAGMENT}};
+  Shader lightShader2{ShaderProgram{SHADERS_FOLDER + "light_source.vert.spv",
+                                    ShaderTypes::VERTEX},
+                      ShaderProgram{SHADERS_FOLDER + "light_source.frag.spv",
+                                    ShaderTypes::FRAGMENT}};
 
   shader.useShader();
 

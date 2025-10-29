@@ -1,5 +1,5 @@
 add_library(shaders
-  Shader.cpp ShaderProgram.cpp 
+  Shader.cpp ShaderProgram.cpp ShaderPrograms.cpp
 )
 
 set (SHADER_OUPUT_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/spv")
@@ -7,6 +7,7 @@ file(MAKE_DIRECTORY ${SHADER_OUPUT_FOLDER})
 
 file(GLOB SHADER_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/*.vert"
+  "${CMAKE_CURRENT_SOURCE_DIR}/*.frag"
 )
 
 set (SPV_OUTPUTS "")

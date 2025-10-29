@@ -24,9 +24,9 @@ private:
   static inline unsigned int globalVBO = 0;
   static inline unsigned int globalEBO = 0;
   static inline unsigned int instance_count = 0;
-  Shader shader;
-  unsigned int texture;
   vec3 global_position;
+  unsigned int texture;
+  Shader shader;
   static constexpr unsigned int CUBE_POINTS = 36;
   std::mutex instance_mut;
 
