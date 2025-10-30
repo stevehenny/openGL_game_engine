@@ -37,6 +37,11 @@ add_executable(sphere_practice
     glad.c
 )
 
+add_executable(sphere_texture
+    sphere_w_tex.cpp
+    glad.c
+)
+
 # -----------------------------------------------------------
 # OpenGL preference
 # -----------------------------------------------------------
@@ -60,6 +65,7 @@ set(COMMON_LIBS
 target_link_libraries(camera_translations PRIVATE ${COMMON_LIBS})
 target_link_libraries(light_source PRIVATE ${COMMON_LIBS})
 target_link_libraries(sphere_practice PRIVATE ${COMMON_LIBS})
+target_link_libraries(sphere_texture PRIVATE ${COMMON_LIBS})
 
 # -----------------------------------------------------------
 # Platform-specific linking
@@ -69,12 +75,14 @@ if(WIN32)
     target_link_libraries(camera_translations PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(light_source PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(sphere_practice PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(sphere_texture PRIVATE opengl32 user32 gdi32 shell32)
 
 else()
     # Link against dl on Linux / WSL
     target_link_libraries(camera_translations PRIVATE dl m)
     target_link_libraries(light_source PRIVATE dl m)
     target_link_libraries(sphere_practice PRIVATE dl m)
+    target_link_libraries(sphere_texture PRIVATE dl m)
 
 endif()
 
