@@ -1,10 +1,13 @@
 #pragma once
 #include <vector>
 
-struct Vertex {
-  float x, y, z;
-  float nx, ny, nz;
-};
+#include <glm/glm.hpp>
+#include <vector>
 
-std::vector<Vertex> generateSphere(float radius, int sectorCount,
-                                   int stackCount);
+struct Vertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
+};
+std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
+                                   unsigned int stackCount);

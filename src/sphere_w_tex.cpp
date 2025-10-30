@@ -1,9 +1,9 @@
-#include "Sphere.h"
 #include "Camera.h"
 #include "Cube.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
+#include "Sphere.h"
 #include "Texture.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
@@ -27,7 +27,6 @@ static vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cerr << "Incorrect number of params\n";
     exit(1);
   }
   char *texturePath = argv[1];
@@ -76,20 +75,11 @@ int main(int argc, char *argv[]) {
   glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
   glBufferData(GL_ARRAY_BUFFER, sphereVerts.size() * sizeof(Vertex),
                sphereVerts.data(), GL_STATIC_DRAW);
-
-  // position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
   glEnableVertexAttribArray(0);
-
-  // normal
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)(offsetof(Vertex, normal)));
+                        (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-
-  // texcoord
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)(offsetof(Vertex, texCoords)));
-  glEnableVertexAttribArray(2);
 
   // Plane VAO/VBO
   static constexpr float planeVertices[] = {
@@ -127,19 +117,11 @@ int main(int argc, char *argv[]) {
       ShaderProgram{compiled_shaders::LIGHT_VERTEX, ShaderTypes::VERTEX},
       ShaderProgram{compiled_shaders::LIGHT_FRAG, ShaderTypes::FRAGMENT}};
 
-  shader.useShader();
-
-  unsigned int sphereTexture;
-  glGenTextures(1, &sphereTexture);
-  glBindTexture(GL_TEXTURE_2D, sphereTexture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  sphereTexture = loadTexture(texturePath);
+  // load in a texture
+  unsigned int texture1;
+  texture1 = loadTexture(texturePath);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture1);
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -156,18 +138,15 @@ int main(int argc, char *argv[]) {
 
     // Draw sphere
     shader.useShader();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sphereTexture);
-    shader.setInt(6, 0);
-    shader.setVec3(5, vec3(1.f, 1.f, 1.f));            // objectColor
-    shader.setVec3(7, vec3(1.f, 0.f, 0.f));            // lightColor
-    shader.setVec3(9, vec3(0.f, 0.f, 1.f));            // lightColor2
-    shader.setVec3(10, lightPos2);                     // lightPos2
+    shader.setVec3(5, 1.f, 1.f, 1.f);                  // objectColor
+    shader.setVec3(6, 1.f, 0.f, 0.f);                  // lightColor
+    shader.setVec3(8, 0.f, 0.f, 1.f);                  // lightColor2
+    shader.setVec3(9, lightPos2);                      // lightPos2
     shader.setMat4(4, camera.get_projection_matrix()); // projection
     shader.setMat4(3, camera.get_view_matrix());       // view
     shader.setMat4(2, mat4(1.0f));                     // model
-    shader.setVec3(8, lightPos);                       // lightPos
-    shader.setVec3(11, camera.get_position());         // viewPos
+    shader.setVec3(7, lightPos);                       // lightPos
+    shader.setVec3(10, camera.get_position());         // viewPos
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 

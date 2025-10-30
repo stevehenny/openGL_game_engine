@@ -1,6 +1,7 @@
 #include "ShaderPrograms.h"
 
-std::string getGitRepoRoot() {
+using std::string, std::string_view;
+string getGitRepoRoot() {
   FILE *pipe = popen("git rev-parse --show-toplevel 2>/dev/null", "r");
   if (!pipe) {
     return "";
@@ -21,11 +22,3 @@ std::string getGitRepoRoot() {
   }
   return result;
 }
-
-static std::string SHADER_FOLDER = getGitRepoRoot() + "/src/shaders/";
-
-ShaderPrograms::ShaderPrograms() {}
-
-ShaderPrograms::~ShaderPrograms() {}
-
-void ShaderPrograms::CompileShaders() {}
