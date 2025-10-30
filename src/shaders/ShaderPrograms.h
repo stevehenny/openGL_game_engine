@@ -13,4 +13,8 @@ inline string OBJECT_W_TEXTURE_VERT =
     SHADER_FOLDER + "object_w_texture.vert.spv";
 inline string OBJECT_W_TEXTURE_FRAG =
     SHADER_FOLDER + "object_w_texture.frag.spv";
+inline string LIGHT_W_TEXTURE_VERT =
+    SHADER_FOLDER + "light_source_w_texture.vert.spv";
+inline string LIGHT_W_TEXTURE_FRAG =
+    SHADER_FOLDER + "light_source_w_texture.frag.spv";
 } // namespace compiled_shaders

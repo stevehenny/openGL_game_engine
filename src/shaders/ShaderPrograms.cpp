@@ -1,4 +1,5 @@
 #include "ShaderPrograms.h"
+#include <iostream>
 
 using std::string, std::string_view;
 string getGitRepoRoot() {
@@ -20,5 +21,6 @@ string getGitRepoRoot() {
   if (!result.empty() && result.back() == '\n') {
     result.pop_back();
   }
+  std::cout << buffer << '\n';
   return result;
 }

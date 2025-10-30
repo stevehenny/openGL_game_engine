@@ -26,11 +26,15 @@ static vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
 static vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    std::cerr << "Incorrect number of params\n";
-    exit(1);
+  if (argc < 4) {
+    std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3>\n";
+    return -1;
   }
+
   char *texturePath = argv[1];
+  char *texture2Path = argv[2];
+  char *texture3Path = argv[3];
+
   // GLFW setup
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -40,7 +44,7 @@ int main(int argc, char *argv[]) {
   GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT,
                                         "LIGHTING_PRACTICE", nullptr, nullptr);
   if (!window) {
-    std::cout << "Failed to create GLFW window" << std::endl;
+    std::cerr << "Failed to create GLFW window\n";
     glfwTerminate();
     return -1;
   }
@@ -62,7 +66,7 @@ int main(int argc, char *argv[]) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "Failed to initialize GLAD" << std::endl;
+    std::cerr << "Failed to initialize GLAD\n";
     return -1;
   }
 
@@ -77,16 +81,11 @@ int main(int argc, char *argv[]) {
   glBufferData(GL_ARRAY_BUFFER, sphereVerts.size() * sizeof(Vertex),
                sphereVerts.data(), GL_STATIC_DRAW);
 
-  // position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
   glEnableVertexAttribArray(0);
-
-  // normal
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)(offsetof(Vertex, normal)));
   glEnableVertexAttribArray(1);
-
-  // texcoord
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)(offsetof(Vertex, texCoords)));
   glEnableVertexAttribArray(2);
@@ -94,10 +93,10 @@ int main(int argc, char *argv[]) {
   // Plane VAO/VBO
   static constexpr float planeVertices[] = {
       // positions          // normals
-      -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f,  5.0f,  0.0f, -5.0f,
-      0.0f,  1.0f, 0.0f,  5.0f,  0.0f, 5.0f,  0.0f,  1.0f, 0.0f,
-      5.0f,  0.0f, 5.0f,  0.0f,  1.0f, 0.0f,  -5.0f, 0.0f, 5.0f,
-      0.0f,  1.0f, 0.0f,  -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f};
+      -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f, 5.0f, 0.0f, -5.0f,
+      0.0f,  1.0f, 0.0f,  5.0f,  0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
+      -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f, 5.0f, 0.0f, 5.0f,
+      0.0f,  1.0f, 0.0f,  -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f};
 
   unsigned int planeVAO, planeVBO;
   glGenVertexArrays(1, &planeVAO);
@@ -119,27 +118,48 @@ int main(int argc, char *argv[]) {
                 ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_FRAG,
                               ShaderTypes::FRAGMENT}};
 
-  Shader lightShader{
-      ShaderProgram{compiled_shaders::LIGHT_VERTEX, ShaderTypes::VERTEX},
-      ShaderProgram{compiled_shaders::LIGHT_FRAG, ShaderTypes::FRAGMENT}};
+  Shader lightShader{ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_VERT,
+                                   ShaderTypes::VERTEX},
+                     ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
+                                   ShaderTypes::FRAGMENT}};
 
-  Shader lightShader2{
-      ShaderProgram{compiled_shaders::LIGHT_VERTEX, ShaderTypes::VERTEX},
-      ShaderProgram{compiled_shaders::LIGHT_FRAG, ShaderTypes::FRAGMENT}};
+  Shader lightShader2{ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_VERT,
+                                    ShaderTypes::VERTEX},
+                      ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
+                                    ShaderTypes::FRAGMENT}};
 
+  unsigned int sphereTexture = loadTexture(texturePath);
+  unsigned int sphereTexture2 = loadTexture(texture2Path);
+  unsigned int sphereTexture3 = loadTexture(texture3Path);
+
+  // --- Cache uniform locations for object shader ---
   shader.useShader();
+  int modelLoc = glGetUniformLocation(shader.ID, "model");
+  int viewLoc = glGetUniformLocation(shader.ID, "view");
+  int projLoc = glGetUniformLocation(shader.ID, "projection");
+  int objectColorLoc = glGetUniformLocation(shader.ID, "objectColor");
+  int lightColorLoc = glGetUniformLocation(shader.ID, "lightColor");
+  int lightPosLoc = glGetUniformLocation(shader.ID, "lightPos");
+  int lightColor2Loc = glGetUniformLocation(shader.ID, "lightColor2");
+  int lightPos2Loc = glGetUniformLocation(shader.ID, "lightPos2");
+  int viewPosLoc = glGetUniformLocation(shader.ID, "viewPos");
+  int texLoc = glGetUniformLocation(shader.ID, "texture1");
 
-  unsigned int sphereTexture;
-  glGenTextures(1, &sphereTexture);
-  glBindTexture(GL_TEXTURE_2D, sphereTexture);
+  // --- Cache uniform locations for first light shader ---
+  lightShader.useShader();
+  int l_modelLoc = glGetUniformLocation(lightShader.ID, "model");
+  int l_viewLoc = glGetUniformLocation(lightShader.ID, "view");
+  int l_projLoc = glGetUniformLocation(lightShader.ID, "projection");
+  int l_lightColorLoc = glGetUniformLocation(lightShader.ID, "lightColor");
+  int l_texLoc = glGetUniformLocation(lightShader.ID, "texture1");
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  sphereTexture = loadTexture(texturePath);
+  // --- Cache uniform locations for second light shader ---
+  lightShader2.useShader();
+  int l2_modelLoc = glGetUniformLocation(lightShader2.ID, "model");
+  int l2_viewLoc = glGetUniformLocation(lightShader2.ID, "view");
+  int l2_projLoc = glGetUniformLocation(lightShader2.ID, "projection");
+  int l2_lightColorLoc = glGetUniformLocation(lightShader2.ID, "lightColor");
+  int l2_texLoc = glGetUniformLocation(lightShader2.ID, "texture1");
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -154,63 +174,60 @@ int main(int argc, char *argv[]) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw sphere
+    // === Object shader ===
     shader.useShader();
+    shader.setMat4(modelLoc, mat4(1.0f));
+    shader.setMat4(viewLoc, camera.get_view_matrix());
+    shader.setMat4(projLoc, camera.get_projection_matrix());
+    shader.setVec3(objectColorLoc, vec3(1.f, 1.f, 1.f));
+    shader.setVec3(lightColorLoc, vec3(1.f, 0.f, 0.f));
+    shader.setVec3(lightPosLoc, lightPos);
+    shader.setVec3(lightColor2Loc, vec3(1.f, 1.f, 1.f));
+    shader.setVec3(lightPos2Loc, lightPos2);
+    shader.setVec3(viewPosLoc, camera.get_position());
+    shader.setInt(texLoc, 0);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sphereTexture);
-    shader.setInt(6, 0);
-    shader.setVec3(5, vec3(1.f, 1.f, 1.f));            // objectColor
-    shader.setVec3(7, vec3(1.f, 0.f, 0.f));            // lightColor
-    shader.setVec3(9, vec3(1.f, 1.f, 1.f));            // lightColor2
-    shader.setVec3(10, lightPos2);                     // lightPos2
-    shader.setMat4(4, camera.get_projection_matrix()); // projection
-    shader.setMat4(3, camera.get_view_matrix());       // view
-    shader.setMat4(2, mat4(1.0f));                     // model
-    shader.setVec3(8, lightPos);                       // lightPos
-    shader.setVec3(11, camera.get_position());         // viewPos
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
-    // Draw plane
-    mat4 planeModel = mat4(1.0f);
-    planeModel = glm::translate(planeModel, vec3(0.0f, -3.0f, 0.0f));
-    shader.setMat4(2, planeModel);
-    shader.setVec3(5, 0.5f, 0.5f, 0.5f);
+    // === Plane ===
+    mat4 planeModel = glm::translate(mat4(1.0f), vec3(0.0f, -3.0f, 0.0f));
+    shader.setMat4(modelLoc, planeModel);
+    shader.setVec3(objectColorLoc, vec3(0.5f, 0.5f, 0.5f));
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    // Draw first light
+    // === First light ===
     lightShader.useShader();
-    lightShader.setMat4(4, camera.get_projection_matrix());
-    lightShader.setMat4(3, camera.get_view_matrix());
-    lightShader.setVec3(5, 1.f, 0.f, 0.f);
-    mat4 model = mat4(1.f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, vec3(0.2f));
-    lightShader.setMat4(2, model);
+    mat4 lightModel = glm::translate(mat4(1.0f), lightPos);
+    lightModel = glm::scale(lightModel, vec3(0.2f));
+    lightShader.setMat4(l_modelLoc, lightModel);
+    lightShader.setMat4(l_viewLoc, camera.get_view_matrix());
+    lightShader.setMat4(l_projLoc, camera.get_projection_matrix());
+    lightShader.setVec3(l_lightColorLoc, vec3(1.f, 0.f, 0.f));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, sphereTexture2);
+    lightShader.setInt(l_texLoc, 1);
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
-    // Draw second light
+    // === Second light ===
     lightShader2.useShader();
-    lightShader2.setMat4(4, camera.get_projection_matrix());
-    lightShader2.setMat4(3, camera.get_view_matrix());
-    lightShader2.setVec3(5, 1.f, 1.f, 1.f);
-    mat4 model2 = mat4(1.f);
-    model2 = glm::translate(model2, lightPos2);
-    model2 = glm::scale(model2, vec3(0.5f));
-    lightShader2.setMat4(2, model2);
+    mat4 light2Model = glm::translate(mat4(1.0f), lightPos2);
+    light2Model = glm::scale(light2Model, vec3(0.5f));
+    lightShader2.setMat4(l2_modelLoc, light2Model);
+    lightShader2.setMat4(l2_viewLoc, camera.get_view_matrix());
+    lightShader2.setMat4(l2_projLoc, camera.get_projection_matrix());
+    lightShader2.setVec3(l2_lightColorLoc, vec3(1.f, 1.f, 1.f));
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, sphereTexture3);
+
+    lightShader2.setInt(l2_texLoc, 2);
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
     glfwSwapBuffers(window);
   }
-
-  glDeleteVertexArrays(1, &sphereVAO);
-  glDeleteVertexArrays(1, &planeVAO);
-  glDeleteBuffers(1, &sphereVBO);
-  glDeleteBuffers(1, &planeVBO);
-
-  glfwTerminate();
-  return 0;
 }
