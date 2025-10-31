@@ -17,4 +17,8 @@ inline string LIGHT_W_TEXTURE_VERT =
     SHADER_FOLDER + "light_source_w_texture.vert.spv";
 inline string LIGHT_W_TEXTURE_FRAG =
     SHADER_FOLDER + "light_source_w_texture.frag.spv";
+
+inline string PLANE_GRAVITY_VERT = SHADER_FOLDER + "plane_gravity.vert.spv";
+
+inline string PLANE_GRAVITY_FRAG = SHADER_FOLDER + "plane_gravity.frag.spv";
 } // namespace compiled_shaders

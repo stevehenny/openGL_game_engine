@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
+#include <cstddef>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,16 +18,34 @@
 using glm::mat4;
 using glm::vec3;
 
+struct Material {
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+  float shininess;
+};
+
+struct Light {
+  vec3 position;
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+};
+
+struct Color {
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+};
+
 static constexpr unsigned int SCR_WIDTH = 1920;
 static constexpr unsigned int SCR_HEIGHT = 1080;
 
-static float deltaTime = 0.0f;
-static float lastFrame = 0.0f;
 static vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
 static vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
 
 int main(int argc, char *argv[]) {
-  if (argc < 4) {
+  if (argc < 5) {
     std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3>\n";
     return -1;
   }
@@ -34,6 +53,7 @@ int main(int argc, char *argv[]) {
   char *texturePath = argv[1];
   char *texture2Path = argv[2];
   char *texture3Path = argv[3];
+  char *texture4Path = argv[4];
 
   // GLFW setup
   glfwInit();
@@ -91,25 +111,58 @@ int main(int argc, char *argv[]) {
   glEnableVertexAttribArray(2);
 
   // Plane VAO/VBO
-  static constexpr float planeVertices[] = {
-      // positions          // normals
-      -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f, 5.0f, 0.0f, -5.0f,
-      0.0f,  1.0f, 0.0f,  5.0f,  0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
-      -5.0f, 0.0f, -5.0f, 0.0f,  1.0f, 0.0f, 5.0f, 0.0f, 5.0f,
-      0.0f,  1.0f, 0.0f,  -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f};
+  // float planeVertices[] = {
+  //     // positions            // normals          // texCoords
+  //     -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+  //     5.0f,  0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+  //     5.0f,  0.0f, 5.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+  //
+  //     -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+  //     5.0f,  0.0f, 5.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+  //     -5.0f, 0.0f, 5.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top-left
+  // };
+  std::vector<Vertex> planeVertices =
+      generatePlane(10.0f, 10.0f, 100u, 100u, 3.0f);
+  std::vector<unsigned int> planeIndices = generateIndices(100u, 100u);
 
-  unsigned int planeVAO, planeVBO;
+  // Move the plane up
+  // const float height = 2.5f;
+  // for (size_t i = 0; i < sizeof(planeVertices) / sizeof(float); i += 8)
+  //   planeVertices[i + 1] += height; // increment Y component
+
+  unsigned int planeVAO, planeVBO, planeEBO;
   glGenVertexArrays(1, &planeVAO);
   glGenBuffers(1, &planeVBO);
+  glGenBuffers(1, &planeEBO);
+
+  // Attribute buffer for plane
   glBindVertexArray(planeVAO);
+
+  // bind VBO vertices
   glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices,
+  glBufferData(GL_ARRAY_BUFFER, planeVertices.size() * sizeof(Vertex),
+               planeVertices.data(), GL_STATIC_DRAW);
+
+  // bind EBO indices
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeEBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               planeIndices.size() * sizeof(unsigned int), planeIndices.data(),
                GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+
+  // position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                        reinterpret_cast<void *>(0));
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
+
+  // normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                        reinterpret_cast<void *>(offsetof(Vertex, normal)));
   glEnableVertexAttribArray(1);
+
+  // texCoord attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                        reinterpret_cast<void *>(offsetof(Vertex, texCoords)));
+  glEnableVertexAttribArray(2);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -128,9 +181,15 @@ int main(int argc, char *argv[]) {
                       ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
                                     ShaderTypes::FRAGMENT}};
 
+  Shader planeShader{
+      ShaderProgram{compiled_shaders::PLANE_GRAVITY_VERT, ShaderTypes::VERTEX},
+      ShaderProgram{compiled_shaders::PLANE_GRAVITY_FRAG,
+                    ShaderTypes::FRAGMENT}};
+
   unsigned int sphereTexture = loadTexture(texturePath);
   unsigned int sphereTexture2 = loadTexture(texture2Path);
   unsigned int sphereTexture3 = loadTexture(texture3Path);
+  unsigned int spaceTimeGrid = loadTexture(texture4Path);
 
   // --- Cache uniform locations for object shader ---
   shader.useShader();
@@ -161,6 +220,16 @@ int main(int argc, char *argv[]) {
   int l2_lightColorLoc = glGetUniformLocation(lightShader2.ID, "lightColor");
   int l2_texLoc = glGetUniformLocation(lightShader2.ID, "texture1");
 
+  planeShader.useShader();
+  int planeModelLoc = glGetUniformLocation(planeShader.ID, "model");
+  int planeViewLoc = glGetUniformLocation(planeShader.ID, "view");
+  int planeProjLoc = glGetUniformLocation(planeShader.ID, "projection");
+  int planeTexLoc = glGetUniformLocation(planeShader.ID, "texture1");
+  int objectUniLocation = glGetUniformLocation(planeShader.ID, "objectPos");
+  int massLocation = glGetUniformLocation(planeShader.ID, "mass");
+
+  // Earth Location
+  vec3 earthLoc = vec3(1.0f, 1.0f, 1.0f);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     float time = glfwGetTime();
@@ -174,9 +243,9 @@ int main(int argc, char *argv[]) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // === Object shader ===
+    // Object shader
     shader.useShader();
-    shader.setMat4(modelLoc, mat4(1.0f));
+    shader.setMat4(modelLoc, glm::translate(mat4(1.0f), earthLoc));
     shader.setMat4(viewLoc, camera.get_view_matrix());
     shader.setMat4(projLoc, camera.get_projection_matrix());
     shader.setVec3(objectColorLoc, vec3(1.f, 1.f, 1.f));
@@ -193,11 +262,18 @@ int main(int argc, char *argv[]) {
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
     // === Plane ===
+    planeShader.useShader();
     mat4 planeModel = glm::translate(mat4(1.0f), vec3(0.0f, -3.0f, 0.0f));
-    shader.setMat4(modelLoc, planeModel);
-    shader.setVec3(objectColorLoc, vec3(0.5f, 0.5f, 0.5f));
+    planeShader.setMat4(planeModelLoc, planeModel);
+    planeShader.setMat4(planeViewLoc, camera.get_view_matrix());
+    planeShader.setMat4(planeProjLoc, camera.get_projection_matrix());
+    planeShader.setVec3(objectUniLocation, earthLoc);
+    planeShader.setFloat(massLocation, 10000.0f);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, spaceTimeGrid);
+    planeShader.setInt(planeTexLoc, 3);
     glBindVertexArray(planeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawElements(GL_TRIANGLES, planeIndices.size(), GL_UNSIGNED_INT, 0);
 
     // === First light ===
     lightShader.useShader();

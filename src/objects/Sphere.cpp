@@ -1,7 +1,10 @@
 
 #include "Sphere.h"
 #include <cmath>
+#include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+
+using glm::vec3, glm::vec2;
 
 std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
                                    unsigned int stackCount) {
@@ -53,4 +56,52 @@ std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
   }
 
   return sphereTriangles;
+}
+
+std::vector<Vertex> generatePlane(float width, float depth,
+                                  unsigned int xSegments,
+                                  unsigned int zSegments, float yPos) {
+  std::vector<Vertex> vertices;
+  vertices.reserve((xSegments + 1) * (zSegments + 1));
+
+  for (unsigned int i = 0; i <= zSegments; ++i) {
+    float z = depth * (static_cast<float>(i) / zSegments - 0.5f);
+    for (unsigned int j = 0; j < xSegments; ++j) {
+      float x = width * (static_cast<float>(j) / xSegments - 0.5f);
+
+      Vertex v;
+      v.position = vec3(x, yPos, z);
+      v.normal = vec3(0.0f, 1.0f, 0.0f);
+      v.texCoords = vec2(static_cast<float>(j) / xSegments,
+                         static_cast<float>(x) / zSegments);
+
+      vertices.push_back(v);
+    }
+  }
+
+  return vertices;
+}
+
+std::vector<unsigned int> generateIndices(unsigned int xSegments,
+                                          unsigned int zSegments) {
+  std::vector<unsigned int> indices;
+  for (unsigned int i = 0; i <= zSegments; ++i) {
+    for (unsigned int j = 0; j <= xSegments; ++j) {
+      unsigned int topLeft = i * (xSegments + 1) + j;
+      unsigned int topRight = topLeft + 1;
+      unsigned int bottomLeft = (i + 1) * (xSegments + 1) + j;
+      unsigned int bottomRight = bottomLeft + 1;
+
+      // first triangle
+      indices.push_back(topLeft);
+      indices.push_back(bottomLeft);
+      indices.push_back(topRight);
+
+      // second triangle
+      indices.push_back(topRight);
+      indices.push_back(bottomLeft);
+      indices.push_back(bottomRight);
+    }
+  }
+  return indices;
 }
