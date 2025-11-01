@@ -1,11 +1,11 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include "EngineObject.h"
+#include "Object.h"
 #include "Shader.h"
 #include <vector>
 using namespace std;
-class Shape : public EngineObject {
+class Shape : public Object {
 
 protected:
   vector<float> vertices;

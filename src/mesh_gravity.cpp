@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "Cube.h"
+#include "MeshPlane.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
@@ -17,93 +18,6 @@
 
 using glm::mat4;
 using glm::vec3;
-
-void satisfyConstraints(std::vector<Vertex> &vertices,
-                        const std::vector<PlaneConstraint> &constraints,
-                        int iterations = 3) {
-  for (int iter = 0; iter < iterations; ++iter) {
-    for (const auto &c : constraints) {
-      Vertex &v1 = vertices[c.i1];
-      Vertex &v2 = vertices[c.i2];
-
-      if (v1.invMass == 0.0f && v2.invMass == 0.0f)
-        continue;
-
-      glm::vec3 delta = v2.position - v1.position;
-      float dist = glm::length(delta);
-      if (dist == 0.0f)
-        continue;
-      float diff = (dist - c.restLength) / dist;
-
-      // Position correction (split according to inverse mass)
-      glm::vec3 correction = delta * 0.5f * diff;
-      if (v1.invMass > 0.0f)
-        v1.position += correction;
-      if (v2.invMass > 0.0f)
-        v2.position -= correction;
-    }
-  }
-}
-
-// free functions for applying Gravity to plane
-void applyGravity(std::vector<Vertex> &vertices, vec3 gravity) {
-  for (auto &v : vertices) {
-    if (v.invMass == 0.0f)
-      continue; // skip fixed vertices
-    v.force += gravity / v.invMass;
-  }
-}
-
-void integrate(std::vector<Vertex> &vertices, float dt, float damping = 0.98f) {
-  for (auto &v : vertices) {
-    if (v.invMass == 0.0f)
-      continue;
-    vec3 temp = v.position;
-    vec3 velocity = (v.position - v.prevPos) * damping;
-    v.position += velocity + v.force * dt * dt;
-
-    // Simple floor constraint
-    if (v.position.y < -0.0f) {
-      v.position.y = -0.0f;
-      v.prevPos = v.position; // stop velocity
-    }
-
-    v.prevPos = temp;
-    v.force = vec3(0.0f);
-  }
-}
-
-void applyObjectGravity(std::vector<Vertex> &vertices, vec3 objPos, float mass,
-                        float G = 6.674e-3f) {
-  for (auto &v : vertices) {
-    if (v.invMass == 0.0f)
-      continue;
-    vec3 dir = objPos - v.position;
-    float dist2 = glm::dot(dir, dir) + 0.001f; // avoid singularity
-    float forceMag = G * mass / dist2;
-    v.force += glm::normalize(dir) * forceMag;
-  }
-}
-
-void computeNormals(std::vector<Vertex> &vertices,
-                    const std::vector<unsigned int> &indices) {
-  for (auto &v : vertices)
-    v.normal = vec3(0.0f);
-
-  for (size_t i = 0; i < indices.size(); i += 3) {
-    Vertex &v0 = vertices[indices[i]];
-    Vertex &v1 = vertices[indices[i + 1]];
-    Vertex &v2 = vertices[indices[i + 2]];
-    vec3 n = glm::normalize(
-        glm::cross(v1.position - v0.position, v2.position - v0.position));
-    v0.normal += n;
-    v1.normal += n;
-    v2.normal += n;
-  }
-
-  for (auto &v : vertices)
-    v.normal = glm::normalize(v.normal);
-}
 
 static constexpr unsigned int SCR_WIDTH = 1920;
 static constexpr unsigned int SCR_HEIGHT = 1080;
@@ -234,6 +148,7 @@ int main(int argc, char *argv[]) {
 
   glEnable(GL_DEPTH_TEST);
 
+  MeshPlane mesh{10.0f, 10.0f, 100u, 100u, 0.0f, 0.98f};
   Shader shader{ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_VERT,
                               ShaderTypes::VERTEX},
                 ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_FRAG,
@@ -248,11 +163,6 @@ int main(int argc, char *argv[]) {
                                     ShaderTypes::VERTEX},
                       ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
                                     ShaderTypes::FRAGMENT}};
-
-  Shader planeShader{
-      ShaderProgram{compiled_shaders::PLANE_GRAVITY_VERT, ShaderTypes::VERTEX},
-      ShaderProgram{compiled_shaders::PLANE_GRAVITY_FRAG,
-                    ShaderTypes::FRAGMENT}};
 
   unsigned int sphereTexture = loadTexture(texturePath);
   unsigned int sphereTexture2 = loadTexture(texture2Path);
@@ -288,14 +198,15 @@ int main(int argc, char *argv[]) {
   int l2_lightColorLoc = glGetUniformLocation(lightShader2.ID, "lightColor");
   int l2_texLoc = glGetUniformLocation(lightShader2.ID, "texture1");
 
-  planeShader.useShader();
-  int planeModelLoc = glGetUniformLocation(planeShader.ID, "model");
-  int planeViewLoc = glGetUniformLocation(planeShader.ID, "view");
-  int planeProjLoc = glGetUniformLocation(planeShader.ID, "projection");
-  int planeTexLoc = glGetUniformLocation(planeShader.ID, "texture1");
-  int objectUniLocation = glGetUniformLocation(planeShader.ID, "objectPos");
-  int massLocation = glGetUniformLocation(planeShader.ID, "mass");
-  int forceWhiteLoc = glGetUniformLocation(planeShader.ID, "forceWhite");
+  mesh.getShader().useShader();
+  int planeModelLoc = glGetUniformLocation(mesh.getShader().ID, "model");
+  int planeViewLoc = glGetUniformLocation(mesh.getShader().ID, "view");
+  int planeProjLoc = glGetUniformLocation(mesh.getShader().ID, "projection");
+  int planeTexLoc = glGetUniformLocation(mesh.getShader().ID, "texture1");
+  int objectUniLocation =
+      glGetUniformLocation(mesh.getShader().ID, "objectPos");
+  int massLocation = glGetUniformLocation(mesh.getShader().ID, "mass");
+  int forceWhiteLoc = glGetUniformLocation(mesh.getShader().ID, "forceWhite");
 
   // Earth Location
   vec3 earthLoc = vec3(1.0f, 1.0f, 1.0f);
@@ -331,38 +242,50 @@ int main(int argc, char *argv[]) {
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
     // update physics
-    // applyGravity(planeVertices, vec3(0.0f, -9.8f, 0.0f));
-    applyObjectGravity(planeVertices, earthLoc, 1e1);
-    applyObjectGravity(planeVertices, lightPos, 100.0f);
-    integrate(planeVertices, 1.0f / 60.0f);
-    satisfyConstraints(planeVertices, constraints, 5);
+    mesh.getShader().useShader();
+    mat4 planeModel = glm::translate(mat4(1.0f), mesh.getLocation());
+    mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
+    mesh.getShader().setMat4(planeModelLoc, planeModel);
+    mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
+    mesh.getShader().setVec3(objectUniLocation, earthLoc);
+    mesh.getShader().setFloat(massLocation, 100.0f);
+    mesh.getShader().setBool(forceWhiteLoc, true);
+    // applyObjectGravity(planeVertices, lightPos, 100.0f);
 
-    // compute normals using TRIANGLES (important)
-    computeNormals(planeVertices, planeTriIndices);
-
-    // upload updated vertex buffer (positions and normals changed)
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, planeVertices.size() * sizeof(Vertex),
-                    planeVertices.data());
+    // all of this is mesh.draw()A
+    mesh.applyGravity(earthLoc, 1e1);
+    mesh.applyGravity(lightPos, 1e1);
+    mesh.update();
+    mesh.draw();
+    // integrate(planeVertices, 1.0f / 60.0f);
+    // satisfyConstraints(planeVertices, constraints, 5);
+    //
+    // // compute normals using TRIANGLES (important)
+    // computeNormals(planeVertices, planeTriIndices);
+    //
+    // // upload updated vertex buffer (positions and normals changed)
+    // glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    // glBufferSubData(GL_ARRAY_BUFFER, 0, planeVertices.size() *
+    // sizeof(Vertex),
+    //                 planeVertices.data());
 
     // draw plane as clean square grid (use line EBO)
-    planeShader.useShader();
-    mat4 planeModel = glm::translate(mat4(1.0f), vec3(0.0f, -3.0f, 0.0f));
-    planeShader.setMat4(planeModelLoc, planeModel);
-    planeShader.setMat4(planeViewLoc, camera.get_view_matrix());
-    planeShader.setMat4(planeProjLoc, camera.get_projection_matrix());
-    planeShader.setVec3(objectUniLocation, earthLoc);
-    planeShader.setFloat(massLocation, 100.0f);
-    planeShader.setBool(forceWhiteLoc, true);
+    // mat4 planeModel = glm::translate(mat4(1.0f), vec3(0.0f, -3.0f, 0.0f));
+    // mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
+    // mesh.getShader().setMat4(planeModelLoc, planeModel);
+    // mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
+    // mesh.getShader().setVec3(objectUniLocation, earthLoc);
+    // mesh.getShader().setFloat(massLocation, 100.0f);
+    // mesh.getShader().setBool(forceWhiteLoc, true);
 
-    glBindVertexArray(planeVAO);
-
-    // bind the line EBO for this draw
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeLineEBO);
-    glDrawElements(GL_LINES, static_cast<GLsizei>(planeLineIndices.size()),
-                   GL_UNSIGNED_INT, 0);
-
-    glBindVertexArray(0);
+    // glBindVertexArray(planeVAO);
+    //
+    // // bind the line EBO for this draw
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeLineEBO);
+    // glDrawElements(GL_LINES, static_cast<GLsizei>(planeLineIndices.size()),
+    //                GL_UNSIGNED_INT, 0);
+    //
+    // glBindVertexArray(0);
 
     // === First light ===
     lightShader.useShader();

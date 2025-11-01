@@ -19,11 +19,11 @@ public:
            Shader shader, unsigned int texture);
   ~Triangle();
   void draw() override;
-  void moveHorizontally(float delta_x) override;
-  void moveVertically(float delta_y) override;
-  void rotateClockwise(float angle) override;
-  void rotateCounterClockwise(float angle) override;
-  void updateBuffer() override;
+  void moveHorizontally(float delta_x);
+  void moveVertically(float delta_y);
+  void rotateClockwise(float angle);
+  void rotateCounterClockwise(float angle);
+  void updateBuffer();
   void computeAverageTriangleSide(const float *inputVertices);
   float distance(const float *a, const float *b);
 };

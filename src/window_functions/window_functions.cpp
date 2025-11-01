@@ -1,5 +1,5 @@
 #include "window_functions.h"
-#include "EngineObject.h"
+#include "Object.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -48,17 +48,17 @@ void process_window_input(GLFWwindow *window) {
   }
 }
 
-void process_object_input(GLFWwindow *window, EngineObject *object) {
-  // object->moveHorizontally(0.01);
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    object->moveVertically(0.01);
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    object->moveVertically(-0.01);
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    object->moveHorizontally(-0.01);
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    object->moveHorizontally(0.01);
-}
+// void process_object_input(GLFWwindow *window, Object *object) {
+//   // object->moveHorizontally(0.01);
+//   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+//     object->moveVertically(0.01);
+//   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+//     object->moveVertically(-0.01);
+//   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+//     object->moveHorizontally(-0.01);
+//   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+//     object->moveHorizontally(0.01);
+// }
 
 void process_camera_movement(GLFWwindow *window, glm::mat4 &view) {
 

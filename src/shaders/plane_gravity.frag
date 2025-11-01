@@ -12,6 +12,7 @@ layout(location=0) out vec4 FragColor;
 layout(location = 20) uniform vec3 objectPos;
 layout(location = 21) uniform float mass;
 layout(location = 22) uniform sampler2D texture1;
+layout(location = 23) uniform bool forceWhite;
 
 void main()
 {
@@ -22,5 +23,8 @@ void main()
     vec3 texColor = texture(texture1, TexCoord).rgb;
     vec3 color = mix(texColor, vec3(1.0, 0.2, 0.2), intensity);
 
-    FragColor = vec4(color, 1.0);
+    if(forceWhite)
+      FragColor = vec4(1.0);
+    else
+      FragColor = vec4(color, 1.0);
 }

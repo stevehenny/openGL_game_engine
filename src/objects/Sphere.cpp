@@ -1,4 +1,3 @@
-
 #include "Sphere.h"
 #include <cmath>
 #include <glm/glm.hpp>
@@ -6,35 +5,31 @@
 
 using glm::vec3, glm::vec2;
 
+// -------------------- SPHERE --------------------
 std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
                                    unsigned int stackCount) {
   std::vector<Vertex> vertices;
 
   for (unsigned int i = 0; i <= stackCount; ++i) {
     float stackAngle =
-        glm::pi<float>() / 2 -
-        (float)i * glm::pi<float>() / stackCount; // from pi/2 to -pi/2
+        glm::pi<float>() / 2 - (float)i * glm::pi<float>() / stackCount;
     float xy = radius * cosf(stackAngle);
     float z = radius * sinf(stackAngle);
 
     for (unsigned int j = 0; j <= sectorCount; ++j) {
       float sectorAngle = (float)j * 2 * glm::pi<float>() / sectorCount;
-
       float x = xy * cosf(sectorAngle);
       float y = xy * sinf(sectorAngle);
-
-      float u = (float)j / sectorCount;
-      float v = (float)i / stackCount;
 
       Vertex vertex;
       vertex.position = glm::vec3(x, y, z);
       vertex.normal = glm::normalize(glm::vec3(x, y, z));
-      vertex.texCoords = glm::vec2(u, v);
+      vertex.texCoords =
+          glm::vec2((float)j / sectorCount, (float)i / stackCount);
       vertices.push_back(vertex);
     }
   }
 
-  // Generate indices for GL_TRIANGLES
   std::vector<Vertex> sphereTriangles;
   for (unsigned int i = 0; i < stackCount; ++i) {
     unsigned int k1 = i * (sectorCount + 1);
@@ -58,6 +53,7 @@ std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
   return sphereTriangles;
 }
 
+// -------------------- PLANE --------------------
 std::vector<Vertex> generatePlane(float width, float depth,
                                   unsigned int xSegments,
                                   unsigned int zSegments, float yPos) {
@@ -65,43 +61,120 @@ std::vector<Vertex> generatePlane(float width, float depth,
   vertices.reserve((xSegments + 1) * (zSegments + 1));
 
   for (unsigned int i = 0; i <= zSegments; ++i) {
-    float z = depth * (static_cast<float>(i) / zSegments - 0.5f);
-    for (unsigned int j = 0; j < xSegments; ++j) {
-      float x = width * (static_cast<float>(j) / xSegments - 0.5f);
+    float z = depth * ((float)i / zSegments - 0.5f);
+    for (unsigned int j = 0; j <= xSegments; ++j) {
+      float x = width * ((float)j / xSegments - 0.5f);
 
       Vertex v;
       v.position = vec3(x, yPos, z);
       v.normal = vec3(0.0f, 1.0f, 0.0f);
-      v.texCoords = vec2(static_cast<float>(j) / xSegments,
-                         static_cast<float>(x) / zSegments);
+      v.texCoords = vec2((float)j / xSegments, (float)i / zSegments);
+      v.prevPos = v.position;
+      v.force = vec3(0.0f);
+      v.invMass = 1.0f;
+
+      if (i == 0 || i == zSegments || j == 0 || j == xSegments)
+        v.invMass = 0.0f;
 
       vertices.push_back(v);
     }
   }
-
   return vertices;
 }
 
+// -------------------- TRIANGLE INDICES --------------------
 std::vector<unsigned int> generateIndices(unsigned int xSegments,
                                           unsigned int zSegments) {
   std::vector<unsigned int> indices;
-  for (unsigned int i = 0; i <= zSegments; ++i) {
-    for (unsigned int j = 0; j <= xSegments; ++j) {
+  indices.reserve(xSegments * zSegments * 6);
+
+  for (unsigned int i = 0; i < zSegments; ++i) {
+    for (unsigned int j = 0; j < xSegments; ++j) {
       unsigned int topLeft = i * (xSegments + 1) + j;
       unsigned int topRight = topLeft + 1;
       unsigned int bottomLeft = (i + 1) * (xSegments + 1) + j;
       unsigned int bottomRight = bottomLeft + 1;
 
-      // first triangle
+      // two triangles per quad
       indices.push_back(topLeft);
       indices.push_back(bottomLeft);
       indices.push_back(topRight);
 
-      // second triangle
       indices.push_back(topRight);
       indices.push_back(bottomLeft);
       indices.push_back(bottomRight);
     }
   }
   return indices;
+}
+
+std::vector<unsigned int> generateGridLineIndices(unsigned int xSegments,
+                                                  unsigned int zSegments) {
+  std::vector<unsigned int> indices;
+
+  // horizontal lines
+  for (unsigned int i = 0; i <= zSegments; ++i) {
+    for (unsigned int j = 0; j < xSegments; ++j) {
+      unsigned int start = i * (xSegments + 1) + j;
+      unsigned int end = start + 1;
+      indices.push_back(start);
+      indices.push_back(end);
+    }
+  }
+
+  // vertical lines
+  for (unsigned int j = 0; j <= xSegments; ++j) {
+    for (unsigned int i = 0; i < zSegments; ++i) {
+      unsigned int start = i * (xSegments + 1) + j;
+      unsigned int end = start + (xSegments + 1);
+      indices.push_back(start);
+      indices.push_back(end);
+    }
+  }
+
+  return indices;
+}
+
+// -------------------- CONSTRAINTS --------------------
+std::vector<PlaneConstraint>
+generatePlaneConstraints(std::vector<Vertex> &planeVertices,
+                         unsigned int xSegments, unsigned int zSegments) {
+  std::vector<PlaneConstraint> constraints;
+
+  for (unsigned int i = 0; i <= zSegments; ++i) {
+    for (unsigned int j = 0; j <= xSegments; ++j) {
+      unsigned int idx = i * (xSegments + 1) + j;
+
+      if (j < xSegments) {
+        unsigned int right = idx + 1;
+        float restLength = glm::length(planeVertices[idx].position -
+                                       planeVertices[right].position);
+        constraints.push_back({idx, right, restLength});
+      }
+
+      if (i < zSegments) {
+        unsigned int down = (i + 1) * (xSegments + 1) + j;
+        float restLength = glm::length(planeVertices[idx].position -
+                                       planeVertices[down].position);
+        constraints.push_back({idx, down, restLength});
+      }
+
+      // keep diagonals if you want shear constraints for physics
+      if (i < zSegments && j < xSegments) {
+        unsigned int downRight = (i + 1) * (xSegments + 1) + j + 1;
+        float restLength = glm::length(planeVertices[idx].position -
+                                       planeVertices[downRight].position);
+        constraints.push_back({idx, downRight, restLength});
+      }
+
+      if (i < zSegments && j > 0) {
+        unsigned int downLeft = (i + 1) * (xSegments + 1) + j - 1;
+        float restLength = glm::length(planeVertices[idx].position -
+                                       planeVertices[downLeft].position);
+        constraints.push_back({idx, downLeft, restLength});
+      }
+    }
+  }
+
+  return constraints;
 }

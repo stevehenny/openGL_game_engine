@@ -12,11 +12,11 @@ public:
   ~Square();
 
   void draw() override;
-  void moveHorizontally(float delta_x) override;
-  void moveVertically(float delta_y) override;
-  void updateBuffer() override;
-  void rotateClockwise(float angle) override;
-  void rotateCounterClockwise(float angle) override;
+  void moveHorizontally(float delta_x);
+  void moveVertically(float delta_y);
+  void updateBuffer();
+  void rotateClockwise(float angle);
+  void rotateCounterClockwise(float angle);
 
 private:
   void generateVertices(const float *inputVertices, size_t count);
