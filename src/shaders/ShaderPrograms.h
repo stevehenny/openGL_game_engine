@@ -21,4 +21,10 @@ inline string LIGHT_W_TEXTURE_FRAG =
 inline string PLANE_GRAVITY_VERT = SHADER_FOLDER + "plane_gravity.vert.spv";
 
 inline string PLANE_GRAVITY_FRAG = SHADER_FOLDER + "plane_gravity.frag.spv";
+inline string TEXT_VERT = SHADER_FOLDER + "text.vert.spv";
+inline string TEXT_FRAG = SHADER_FOLDER + "text.frag.spv";
+inline string MULTI_OBJ_PLANE_VERT =
+    SHADER_FOLDER + "plane_gravity_multi.vert.spv";
+inline string MULTI_OBJ_PLANE_FRAG =
+    SHADER_FOLDER + "plane_gravity_multi.frag.spv";
 } // namespace compiled_shaders

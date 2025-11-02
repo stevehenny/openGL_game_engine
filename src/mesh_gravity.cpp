@@ -1,20 +1,23 @@
 #include "Camera.h"
+#include "Common.h"
 #include "Cube.h"
 #include "MeshPlane.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
 #include "Sphere.h"
+#include "TextRender.h"
 #include "Texture.h"
+#include "external/stb/stb_easy_font.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>
-#include <cstddef>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <stb_image.h>
+#include <vector>
 
 using glm::mat4;
 using glm::vec3;
@@ -22,12 +25,10 @@ using glm::vec3;
 static constexpr unsigned int SCR_WIDTH = 1920;
 static constexpr unsigned int SCR_HEIGHT = 1080;
 
-static vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
-static vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
-
 int main(int argc, char *argv[]) {
-  if (argc < 5) {
-    std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3>\n";
+  if (argc < 6) {
+    std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3> "
+                 "<texture4> <font>\n";
     return -1;
   }
 
@@ -35,6 +36,7 @@ int main(int argc, char *argv[]) {
   char *texture2Path = argv[2];
   char *texture3Path = argv[3];
   char *texture4Path = argv[4];
+  char *font = argv[5];
 
   // GLFW setup
   glfwInit();
@@ -50,6 +52,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(0);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -66,43 +69,36 @@ int main(int argc, char *argv[]) {
                 0.1f,
                 100.f,
                 2.5f};
-
   glfwSetWindowUserPointer(window, &camera);
   glfwSetCursorPosCallback(window, Camera::mouse_callback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  // Generate sphere
-  auto sphereVerts = generateSphere(0.5f, 36, 18);
 
-  unsigned int sphereVAO, sphereVBO;
+  // Sphere setup
+  auto sphereVerts = generateSphere(0.5f, 36, 18);
+  GLuint sphereVAO, sphereVBO;
   glGenVertexArrays(1, &sphereVAO);
   glGenBuffers(1, &sphereVBO);
   glBindVertexArray(sphereVAO);
   glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
   glBufferData(GL_ARRAY_BUFFER, sphereVerts.size() * sizeof(Vertex),
                sphereVerts.data(), GL_STATIC_DRAW);
-
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)(offsetof(Vertex, normal)));
+                        (void *)offsetof(Vertex, normal));
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)(offsetof(Vertex, texCoords)));
+                        (void *)offsetof(Vertex, texCoords));
   glEnableVertexAttribArray(2);
 
-  // Plane VAO/VBO
-
-  // --- Plane data & indices (triangles + lines) ---
+  // Plane setup
   std::vector<Vertex> planeVertices =
       generatePlane(20.0f, 20.0f, 100u, 100u, 3.0f);
-  std::vector<unsigned int> planeTriIndices =
-      generateIndices(100u, 100u); // triangles (for normals / optional surf)
+  std::vector<unsigned int> planeTriIndices = generateIndices(100u, 100u);
   std::vector<unsigned int> planeLineIndices =
-      generateGridLineIndices(100u, 100u); // lines (for wireframe)
-  std::vector<PlaneConstraint> constraints =
-      generatePlaneConstraints(planeVertices, 100u, 100u);
+      generateGridLineIndices(100u, 100u);
+  MeshPlane mesh{30.0f, 30.0f, 300u, 300u, 0.0f, 0.98f};
 
-  // --- VAO/VBO/EBOs for plane (two EBOs) ---
   GLuint planeVAO, planeVBO, planeTriEBO, planeLineEBO;
   glGenVertexArrays(1, &planeVAO);
   glGenBuffers(1, &planeVBO);
@@ -110,54 +106,39 @@ int main(int argc, char *argv[]) {
   glGenBuffers(1, &planeLineEBO);
 
   glBindVertexArray(planeVAO);
-
-  // VBO
   glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
   glBufferData(GL_ARRAY_BUFFER, planeVertices.size() * sizeof(Vertex),
                planeVertices.data(), GL_DYNAMIC_DRAW);
-
-  // TRI EBO (needed for computeNormals reference; also optional to draw
-  // triangles)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeTriEBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                planeTriIndices.size() * sizeof(unsigned int),
                planeTriIndices.data(), GL_STATIC_DRAW);
 
-  // vertex attributes: position, normal, texCoords
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        reinterpret_cast<void *>(offsetof(Vertex, position)));
-
+                        (void *)offsetof(Vertex, position));
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        reinterpret_cast<void *>(offsetof(Vertex, normal)));
-
+                        (void *)offsetof(Vertex, normal));
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        reinterpret_cast<void *>(offsetof(Vertex, texCoords)));
+                        (void *)offsetof(Vertex, texCoords));
 
-  // Upload line EBO too (we will bind it before drawing lines)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeLineEBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                planeLineIndices.size() * sizeof(unsigned int),
                planeLineIndices.data(), GL_STATIC_DRAW);
-
-  // Unbind VAO (optional)
   glBindVertexArray(0);
 
-  MeshPlane mesh{10.0f, 10.0f, 100u, 100u, 0.0f, 0.98f};
-  glEnable(GL_DEPTH_TEST);
-
+  // Shaders
   Shader shader{ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_VERT,
                               ShaderTypes::VERTEX},
                 ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_FRAG,
                               ShaderTypes::FRAGMENT}};
-
   Shader lightShader{ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_VERT,
                                    ShaderTypes::VERTEX},
                      ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
                                    ShaderTypes::FRAGMENT}};
-
   Shader lightShader2{ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_VERT,
                                     ShaderTypes::VERTEX},
                       ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
@@ -166,7 +147,6 @@ int main(int argc, char *argv[]) {
   unsigned int sphereTexture = loadTexture(texturePath);
   unsigned int sphereTexture2 = loadTexture(texture2Path);
   unsigned int sphereTexture3 = loadTexture(texture3Path);
-  unsigned int spaceTimeGrid = loadTexture(texture4Path);
 
   // --- Cache uniform locations for object shader ---
   shader.useShader();
@@ -206,12 +186,19 @@ int main(int argc, char *argv[]) {
       glGetUniformLocation(mesh.getShader().ID, "objectPos");
   int massLocation = glGetUniformLocation(mesh.getShader().ID, "mass");
   int forceWhiteLoc = glGetUniformLocation(mesh.getShader().ID, "forceWhite");
+  int numObjectsLoc = glGetUniformLocation(mesh.getShader().ID, "numObjects");
 
-  // Earth Location
-  //
+  glEnable(GL_DEPTH_TEST);
   double lastTime = glfwGetTime();
   int nbFrames = 0;
   vec3 earthLoc = vec3(1.0f, 1.0f, 1.0f);
+  vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
+  vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
+  vector<vec3> objPos = {earthLoc, lightPos, lightPos2};
+  vector<float> masses = {1e12, 1e11, 1e10};
+  vector<GravityObject> objects = {GravityObject{objPos[0], masses[0]},
+                                   GravityObject{objPos[1], masses[1]},
+                                   GravityObject{objPos[2], masses[2]}};
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     float time = glfwGetTime();
@@ -219,27 +206,34 @@ int main(int argc, char *argv[]) {
     camera.move_camera(window);
 
     nbFrames++;
-    time = glfwGetTime();
+    double fps = 0.0;
     if (time - lastTime >= 1.0) {
-      double fps = static_cast<double>(nbFrames) / (time - lastTime);
+      fps = static_cast<double>(nbFrames) / (time - lastTime);
+      nbFrames = 0;
+      lastTime = time;
+      std::cout << "FPS: " << fps << '\n';
     }
+
     // Animate lights
-    lightPos = vec3(sin(time) * 2.0f, 1.0f, cos(time) * 2.0f);
-    lightPos2 = vec3(cos(time) * 2.0f, cos(time) * 2.0f, sin(time) * 2.0f);
-    earthLoc = vec3(sin(time) * 1.0f, 2.0f, cos(time) * 1.0f);
+    objects[0].position = vec3(sin(time) * 1.0f, 2.0f, cos(time) * 1.0f);
+    objects[1].position = vec3(sin(time) * 2.0f + 10, 1.0f, cos(time) * 2.0f);
+    objects[2].position =
+        vec3(cos(time) * 2.0f, cos(time) * 2.0f, sin(time) * 2.0f);
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Object shader
+    // === Draw main object ===
     shader.useShader();
-    shader.setMat4(modelLoc, glm::translate(mat4(1.0f), earthLoc));
+    mat4 model = glm::translate(mat4(1.0f), objects[0].position);
+    shader.setMat4(modelLoc, model);
     shader.setMat4(viewLoc, camera.get_view_matrix());
     shader.setMat4(projLoc, camera.get_projection_matrix());
     shader.setVec3(objectColorLoc, vec3(1.f, 1.f, 1.f));
     shader.setVec3(lightColorLoc, vec3(1.f, 0.f, 0.f));
-    shader.setVec3(lightPosLoc, lightPos);
+    shader.setVec3(lightPosLoc, objects[1].position);
     shader.setVec3(lightColor2Loc, vec3(1.f, 1.f, 1.f));
-    shader.setVec3(lightPos2Loc, lightPos2);
+    shader.setVec3(lightPos2Loc, objects[2].position);
     shader.setVec3(viewPosLoc, camera.get_position());
     shader.setInt(texLoc, 0);
 
@@ -248,26 +242,22 @@ int main(int argc, char *argv[]) {
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
-    // update physics
+    // === Draw mesh plane ===
     mesh.getShader().useShader();
+    mesh.updateSBBO(objects);
     mat4 planeModel = glm::translate(mat4(1.0f), mesh.getLocation());
-    mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
     mesh.getShader().setMat4(planeModelLoc, planeModel);
+    mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
     mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
-    mesh.getShader().setVec3(objectUniLocation, earthLoc);
-    mesh.getShader().setFloat(massLocation, 100.0f);
-    mesh.getShader().setBool(forceWhiteLoc, true);
-    // applyObjectGravity(planeVertices, lightPos, 100.0f);
-
-    // all of this is mesh.draw()A
-    // mesh.applyGravity(earthLoc, 1e1);
-    // mesh.applyGravity(lightPos, 1e1);
-    // mesh.update();
+    // mesh.getShader().setVec3(objectUniLocation, objects[0].position);
+    // mesh.getShader().setFloat(massLocation, 1000000000000.0f);
+    // mesh.getShader().setBool(forceWhiteLoc, true);
+    mesh.getShader().setInt(numObjectsLoc, static_cast<int>(objects.size()));
     mesh.draw();
 
-    // === First light ===
+    // === Draw first light ===
     lightShader.useShader();
-    mat4 lightModel = glm::translate(mat4(1.0f), lightPos);
+    mat4 lightModel = glm::translate(mat4(1.0f), objects[1].position);
     lightModel = glm::scale(lightModel, vec3(0.2f));
     lightShader.setMat4(l_modelLoc, lightModel);
     lightShader.setMat4(l_viewLoc, camera.get_view_matrix());
@@ -279,9 +269,9 @@ int main(int argc, char *argv[]) {
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
-    // === Second light ===
+    // === Draw second light ===
     lightShader2.useShader();
-    mat4 light2Model = glm::translate(mat4(1.0f), lightPos2);
+    mat4 light2Model = glm::translate(mat4(1.0f), objects[2].position);
     light2Model = glm::scale(light2Model, vec3(0.5f));
     lightShader2.setMat4(l2_modelLoc, light2Model);
     lightShader2.setMat4(l2_viewLoc, camera.get_view_matrix());
@@ -289,11 +279,11 @@ int main(int argc, char *argv[]) {
     lightShader2.setVec3(l2_lightColorLoc, vec3(1.f, 1.f, 1.f));
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, sphereTexture3);
-
     lightShader2.setInt(l2_texLoc, 2);
     glBindVertexArray(sphereVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
 
+    glfwPollEvents();
     glfwSwapBuffers(window);
   }
 }

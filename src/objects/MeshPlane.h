@@ -17,9 +17,9 @@ public:
   ~MeshPlane();
   void draw() override;
   void update();
-  void applyGravity(vec3 objectPos, double objectMass);
   vec3 getLocation() const;
   Shader &getShader() const;
+  void updateSBBO(vector<GravityObject> &objects) const;
 
 private:
   auto generateVertices(double width, double depth) -> vector<Vertex>;
@@ -30,9 +30,6 @@ private:
   auto generatePlaneConstraints(vector<Vertex> &planeVertices)
       -> vector<PlaneConstraint>;
 
-  void updateNormals();
-  void integrateGravity(float frameFreq);
-  void satisfyConstraints();
   vector<Vertex> planeVertices;
   vector<unsigned int> planeTriIndices;  // used for tracking effects
   vector<unsigned int> planeLineIndices; // used to draw

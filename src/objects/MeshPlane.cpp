@@ -11,23 +11,25 @@ using glm::vec3;
 class MeshPlane::Impl {
 public:
   Impl()
-      : shader(Shader{ShaderProgram{compiled_shaders::PLANE_GRAVITY_VERT,
+      : shader(Shader{ShaderProgram{compiled_shaders::MULTI_OBJ_PLANE_VERT,
                                     ShaderTypes::VERTEX},
-                      ShaderProgram{compiled_shaders::PLANE_GRAVITY_FRAG,
+                      ShaderProgram{compiled_shaders::MULTI_OBJ_PLANE_FRAG,
                                     ShaderTypes::FRAGMENT}}) {
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
     glGenBuffers(1, &planeTriEBO);
     glGenBuffers(1, &planeLineEBO);
+    glGenBuffers(1, &SBBO);
   }
   ~Impl() {
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &planeVBO);
     glDeleteBuffers(1, &planeTriEBO);
     glDeleteBuffers(1, &planeLineEBO);
+    glDeleteBuffers(1, &SBBO);
   }
 
-  GLuint planeVAO, planeVBO, planeTriEBO, planeLineEBO;
+  GLuint planeVAO, planeVBO, planeTriEBO, planeLineEBO, SBBO;
   Shader shader;
 };
 
@@ -77,25 +79,6 @@ MeshPlane::MeshPlane(double width, double depth, unsigned int xSegments,
 }
 
 MeshPlane::~MeshPlane() = default;
-
-void MeshPlane::updateNormals() {
-  for (auto &v : planeVertices)
-    v.normal = vec3(0.0f);
-
-  for (size_t i = 0; i < planeTriIndices.size(); i += 3) {
-    Vertex &v0 = planeVertices[planeTriIndices[i]];
-    Vertex &v1 = planeVertices[planeTriIndices[i + 1]];
-    Vertex &v2 = planeVertices[planeTriIndices[i + 2]];
-    vec3 n = glm::normalize(
-        glm::cross(v1.position - v0.position, v2.position - v0.position));
-    v0.normal += n;
-    v1.normal += n;
-    v2.normal += n;
-  }
-
-  for (auto &v : planeVertices)
-    v.normal = glm::normalize(v.normal);
-}
 
 auto MeshPlane::generateVertices(double width, double depth) -> vector<Vertex> {
 
@@ -218,63 +201,13 @@ auto MeshPlane::generatePlaneConstraints(vector<Vertex> &planeVertices)
   return constraints;
 }
 
-void MeshPlane::integrateGravity(float frameFreq) {
-
-  for (auto &v : planeVertices) {
-    if (v.invMass == 0.0f)
-      continue;
-    vec3 temp = v.position;
-    vec3 velocity = (v.position - v.prevPos) * damping;
-    v.position += velocity + v.force * frameFreq * frameFreq;
-
-    // Simple floor constraint
-    if (v.position.y < -0.0f) {
-      v.position.y = -0.0f;
-      v.prevPos = v.position; // stop velocity
-    }
-
-    v.prevPos = temp;
-    v.force = vec3(0.0f);
-  }
-}
-void MeshPlane::satisfyConstraints() {
-  constexpr int iterations = 3;
-  for (int iter = 0; iter < iterations; ++iter) {
-    for (const auto &c : planeConstraints) {
-      Vertex &v1 = planeVertices[c.i1];
-      Vertex &v2 = planeVertices[c.i2];
-
-      if (v1.invMass == 0.0f && v2.invMass == 0.0f)
-        continue;
-
-      glm::vec3 delta = v2.position - v1.position;
-      float dist = glm::length(delta);
-      if (dist == 0.0f)
-        continue;
-      float diff = (dist - c.restLength) / dist;
-
-      // Position correction (split according to inverse mass)
-      glm::vec3 correction = delta * 0.5f * diff;
-      if (v1.invMass > 0.0f)
-        v1.position += correction;
-      if (v2.invMass > 0.0f)
-        v2.position -= correction;
-    }
-  }
-}
-void MeshPlane::update() {
-
-  integrateGravity(1.0f / 60.0f);
-  satisfyConstraints();
-  updateNormals();
-}
 void MeshPlane::draw() {
 
   glBindVertexArray(resources->planeVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, resources->planeVBO);
+  // glBindBuffer(GL_ARRAY_BUFFER, resources->planeVBO);
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * planeVertices.size(),
-                  planeVertices.data());
+  // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * planeVertices.size(),
+  //                 planeVertices.data());
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, resources->planeLineEBO);
   glDrawElements(GL_LINES, static_cast<GLsizei>(planeLineIndices.size()),
@@ -283,16 +216,13 @@ void MeshPlane::draw() {
   glBindVertexArray(0);
 }
 
-void MeshPlane::applyGravity(vec3 objPos, double mass) {
-
-  for (auto &v : planeVertices) {
-    if (v.invMass == 0.0f)
-      continue;
-    vec3 dir = objPos - v.position;
-    float dist2 = glm::dot(dir, dir) + 0.001f; // avoid singularity
-    float forceMag = (physics_constants::G * mass) / dist2;
-    v.force += glm::normalize(dir) * forceMag;
-  }
-}
 vec3 MeshPlane::getLocation() const { return vec3(0.0f, yPos, 0.0f); }
 Shader &MeshPlane::getShader() const { return resources->shader; }
+void MeshPlane::updateSBBO(vector<GravityObject> &objects) const {
+
+  // define SBBO
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SBBO);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GravityObject) * objects.size(),
+               objects.data(), GL_DYNAMIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resources->SBBO);
+}

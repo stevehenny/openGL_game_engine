@@ -42,6 +42,18 @@ struct Color {
   vec3 specular;
 };
 
+// padded to 32 bytes
+// GLSL will pad to in bytes of 16,
+// so to match on the host side we
+// need to manually pad
+struct alignas(16) GravityObject {
+  vec3 position;
+  float mass;
+};
+
+static_assert(sizeof(GravityObject) == 16,
+              "'GravityObject' is not padded correctly!\n");
+
 namespace physics_constants {
 constexpr inline double G = 6.674e-11;
 }

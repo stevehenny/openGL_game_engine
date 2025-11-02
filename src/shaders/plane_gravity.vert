@@ -19,7 +19,7 @@ layout(location = 21) uniform float mass;
 // tweakable parameters (you can expose these as uniforms if you like)
 const float EPS = 0.5;        // avoids singularity near dist=0
 const float EXPONENT = 2.0;
-const float MASS_SCALE = 5.0;
+const float MASS_SCALE = 5.0e-11;
 const float MAX_DISP = 1.0;   // maximum displacement magnitude (positive value)
 const float EFFECT_RADIUS = 6.0; // beyond this distance the effect fades out
 
@@ -37,7 +37,7 @@ void main() {
     float rawDisp = - scaledMass / pow(dist + EPS, EXPONENT);
 
     // clamp max displacement so it doesn't blow up
-    float disp = clamp(rawDisp, -MAX_DISP, 0.0);
+    float disp = rawDisp;
 
     // optionally fade out with a smoothstep near EFFECT_RADIUS
     float fade = 1.0 - smoothstep(EFFECT_RADIUS * 0.6, EFFECT_RADIUS, dist);
