@@ -91,44 +91,7 @@ int main(int argc, char *argv[]) {
                         (void *)offsetof(Vertex, texCoords));
   glEnableVertexAttribArray(2);
 
-  // Plane setup
-  std::vector<Vertex> planeVertices =
-      generatePlane(20.0f, 20.0f, 100u, 100u, 3.0f);
-  std::vector<unsigned int> planeTriIndices = generateIndices(100u, 100u);
-  std::vector<unsigned int> planeLineIndices =
-      generateGridLineIndices(100u, 100u);
   MeshPlane mesh{30.0f, 30.0f, 300u, 300u, 0.0f, 0.98f};
-
-  GLuint planeVAO, planeVBO, planeTriEBO, planeLineEBO;
-  glGenVertexArrays(1, &planeVAO);
-  glGenBuffers(1, &planeVBO);
-  glGenBuffers(1, &planeTriEBO);
-  glGenBuffers(1, &planeLineEBO);
-
-  glBindVertexArray(planeVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-  glBufferData(GL_ARRAY_BUFFER, planeVertices.size() * sizeof(Vertex),
-               planeVertices.data(), GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeTriEBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               planeTriIndices.size() * sizeof(unsigned int),
-               planeTriIndices.data(), GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)offsetof(Vertex, position));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)offsetof(Vertex, normal));
-  glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)offsetof(Vertex, texCoords));
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeLineEBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               planeLineIndices.size() * sizeof(unsigned int),
-               planeLineIndices.data(), GL_STATIC_DRAW);
-  glBindVertexArray(0);
 
   // Shaders
   Shader shader{ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_VERT,
@@ -249,9 +212,6 @@ int main(int argc, char *argv[]) {
     mesh.getShader().setMat4(planeModelLoc, planeModel);
     mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
     mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
-    // mesh.getShader().setVec3(objectUniLocation, objects[0].position);
-    // mesh.getShader().setFloat(massLocation, 1000000000000.0f);
-    // mesh.getShader().setBool(forceWhiteLoc, true);
     mesh.getShader().setInt(numObjectsLoc, static_cast<int>(objects.size()));
     mesh.draw();
 
