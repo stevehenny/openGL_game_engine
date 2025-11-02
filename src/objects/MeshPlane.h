@@ -1,5 +1,5 @@
 #pragma once
-#include "CommonStructs.h"
+#include "Common.h"
 #include "Object.h"
 #include "Shader.h"
 #include "glad/glad.h"
@@ -9,7 +9,7 @@
 #include <vector>
 
 using glm::vec3, std::vector;
-class MeshPlane : Object {
+class MeshPlane : public Object {
 
 public:
   MeshPlane(double width, double depth, unsigned int xSegments,

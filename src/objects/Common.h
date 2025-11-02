@@ -41,3 +41,7 @@ struct Color {
   vec3 diffuse;
   vec3 specular;
 };
+
+namespace physics_constants {
+constexpr inline double G = 6.674e-11;
+}

@@ -33,8 +33,9 @@ public:
 
 MeshPlane::MeshPlane(double width, double depth, unsigned int xSegments,
                      unsigned int zSegments, float yPos, float damping)
-    : width(width), depth(depth), xSegments(xSegments), zSegments(zSegments),
-      yPos(yPos), damping(damping), resources(std::make_unique<Impl>()) {
+    : Object(), width(width), depth(depth), xSegments(xSegments),
+      zSegments(zSegments), yPos(yPos), damping(damping),
+      resources(std::make_unique<Impl>()) {
   planeVertices = generateVertices(width, depth);
   planeTriIndices = generateTriIndices();
   planeLineIndices = generateLineIndices();
@@ -284,13 +285,12 @@ void MeshPlane::draw() {
 
 void MeshPlane::applyGravity(vec3 objPos, double mass) {
 
-  constexpr double G = 6.674e-11;
   for (auto &v : planeVertices) {
     if (v.invMass == 0.0f)
       continue;
     vec3 dir = objPos - v.position;
     float dist2 = glm::dot(dir, dir) + 0.001f; // avoid singularity
-    float forceMag = G * mass / dist2;
+    float forceMag = (physics_constants::G * mass) / dist2;
     v.force += glm::normalize(dir) * forceMag;
   }
 }

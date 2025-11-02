@@ -12,7 +12,8 @@ constexpr unsigned int VIEW_LOC = 3;
 constexpr unsigned int MODEL_LOC = 4;
 
 Cube::Cube(vec3 global_position, unsigned int texture, Shader shader)
-    : global_position(global_position), texture(texture), shader(shader) {
+    : Object(), global_position(global_position), texture(texture),
+      shader(shader) {
   std::lock_guard<std::mutex> lock(instance_mut);
   if (instance_count == 0) {
     init();

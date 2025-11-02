@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Object.h"
 #include "top_level_include.h"
 #include <glm/glm.hpp>
 
 using glm::vec3, glm::mat4, glm::sin, glm::cos;
 
-class Camera {
+class Camera : public Object {
 public:
   Camera(vec3 position, vec3 camera_front, vec3 camera_up, float display_width,
          float display_height, float sensitivity, float near_clip,
@@ -23,6 +24,7 @@ public:
   vec3 &get_position();
   vec3 &get_front();
   vec3 &get_up();
+  void draw() override;
   ~Camera() = default;
 
 private:

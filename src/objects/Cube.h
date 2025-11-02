@@ -1,4 +1,5 @@
 #pragma once
+#include "Object.h"
 #include "Shader.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -6,7 +7,7 @@
 #include <mutex>
 
 using glm::vec3, glm::mat4, std::cout;
-class Cube {
+class Cube : public Object {
 public:
   Cube(vec3 global_position, unsigned int texture, Shader shader);
   ~Cube();

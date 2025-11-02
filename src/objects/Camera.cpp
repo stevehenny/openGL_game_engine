@@ -9,7 +9,7 @@
 Camera::Camera(vec3 position, vec3 camera_front, vec3 camera_up,
                float display_width, float display_height, float sensitivity,
                float near_clip, float far_clip, float camera_speed)
-    : camera_position(position), camera_front(camera_front),
+    : Object(), camera_position(position), camera_front(camera_front),
       camera_up(camera_up), lastX(display_width / 2.0f),
       lastY(display_height / 2.0), sensitivity(sensitivity),
       near_clip(near_clip), far_clip(far_clip), camera_speed(camera_speed) {
@@ -121,3 +121,5 @@ vec3 &Camera::get_up() { return camera_up; }
 //   glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 //   glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 // }
+//
+void Camera::draw() {}

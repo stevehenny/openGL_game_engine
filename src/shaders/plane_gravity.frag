@@ -17,14 +17,5 @@ layout(location = 23) uniform bool forceWhite;
 void main()
 {
     // Compute distance-based color to visualize gravity effect
-    float dist = length(FragPos - objectPos);
-    float intensity = clamp(1.0 / (dist + 0.1), 0.0, 1.0);
-
-    vec3 texColor = texture(texture1, TexCoord).rgb;
-    vec3 color = mix(texColor, vec3(1.0, 0.2, 0.2), intensity);
-
-    if(forceWhite)
       FragColor = vec4(1.0);
-    else
-      FragColor = vec4(color, 1.0);
 }

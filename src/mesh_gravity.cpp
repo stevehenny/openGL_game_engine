@@ -52,6 +52,11 @@ int main(int argc, char *argv[]) {
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    std::cerr << "Failed to initialize GLAD\n";
+    return -1;
+  }
+
   Camera camera{vec3(0.0f, 0.0f, 3.0f),
                 vec3(0.f, 0.f, -1.f),
                 vec3(0.f, 1.f, 0.f),
@@ -65,12 +70,6 @@ int main(int argc, char *argv[]) {
   glfwSetWindowUserPointer(window, &camera);
   glfwSetCursorPosCallback(window, Camera::mouse_callback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cerr << "Failed to initialize GLAD\n";
-    return -1;
-  }
-
   // Generate sphere
   auto sphereVerts = generateSphere(0.5f, 36, 18);
 
@@ -146,9 +145,9 @@ int main(int argc, char *argv[]) {
   // Unbind VAO (optional)
   glBindVertexArray(0);
 
+  MeshPlane mesh{10.0f, 10.0f, 100u, 100u, 0.0f, 0.98f};
   glEnable(GL_DEPTH_TEST);
 
-  MeshPlane mesh{10.0f, 10.0f, 100u, 100u, 0.0f, 0.98f};
   Shader shader{ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_VERT,
                               ShaderTypes::VERTEX},
                 ShaderProgram{compiled_shaders::OBJECT_W_TEXTURE_FRAG,
@@ -209,6 +208,9 @@ int main(int argc, char *argv[]) {
   int forceWhiteLoc = glGetUniformLocation(mesh.getShader().ID, "forceWhite");
 
   // Earth Location
+  //
+  double lastTime = glfwGetTime();
+  int nbFrames = 0;
   vec3 earthLoc = vec3(1.0f, 1.0f, 1.0f);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -216,6 +218,11 @@ int main(int argc, char *argv[]) {
     camera.update_camera_delta_time(time);
     camera.move_camera(window);
 
+    nbFrames++;
+    time = glfwGetTime();
+    if (time - lastTime >= 1.0) {
+      double fps = static_cast<double>(nbFrames) / (time - lastTime);
+    }
     // Animate lights
     lightPos = vec3(sin(time) * 2.0f, 1.0f, cos(time) * 2.0f);
     lightPos2 = vec3(cos(time) * 2.0f, cos(time) * 2.0f, sin(time) * 2.0f);
@@ -253,39 +260,10 @@ int main(int argc, char *argv[]) {
     // applyObjectGravity(planeVertices, lightPos, 100.0f);
 
     // all of this is mesh.draw()A
-    mesh.applyGravity(earthLoc, 1e1);
-    mesh.applyGravity(lightPos, 1e1);
-    mesh.update();
+    // mesh.applyGravity(earthLoc, 1e1);
+    // mesh.applyGravity(lightPos, 1e1);
+    // mesh.update();
     mesh.draw();
-    // integrate(planeVertices, 1.0f / 60.0f);
-    // satisfyConstraints(planeVertices, constraints, 5);
-    //
-    // // compute normals using TRIANGLES (important)
-    // computeNormals(planeVertices, planeTriIndices);
-    //
-    // // upload updated vertex buffer (positions and normals changed)
-    // glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    // glBufferSubData(GL_ARRAY_BUFFER, 0, planeVertices.size() *
-    // sizeof(Vertex),
-    //                 planeVertices.data());
-
-    // draw plane as clean square grid (use line EBO)
-    // mat4 planeModel = glm::translate(mat4(1.0f), vec3(0.0f, -3.0f, 0.0f));
-    // mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
-    // mesh.getShader().setMat4(planeModelLoc, planeModel);
-    // mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
-    // mesh.getShader().setVec3(objectUniLocation, earthLoc);
-    // mesh.getShader().setFloat(massLocation, 100.0f);
-    // mesh.getShader().setBool(forceWhiteLoc, true);
-
-    // glBindVertexArray(planeVAO);
-    //
-    // // bind the line EBO for this draw
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeLineEBO);
-    // glDrawElements(GL_LINES, static_cast<GLsizei>(planeLineIndices.size()),
-    //                GL_UNSIGNED_INT, 0);
-    //
-    // glBindVertexArray(0);
 
     // === First light ===
     lightShader.useShader();

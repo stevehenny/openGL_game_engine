@@ -18,8 +18,8 @@ layout(location = 21) uniform float mass;
 
 // tweakable parameters (you can expose these as uniforms if you like)
 const float EPS = 0.5;        // avoids singularity near dist=0
-const float EXPONENT = 2.0;   // 1.0 = linear falloff, 2.0 = inverse-square
-const float MASS_SCALE = 5.0; // scale down your mass; multiply mass * MASS_SCALE
+const float EXPONENT = 2.0;
+const float MASS_SCALE = 5.0;
 const float MAX_DISP = 1.0;   // maximum displacement magnitude (positive value)
 const float EFFECT_RADIUS = 6.0; // beyond this distance the effect fades out
 

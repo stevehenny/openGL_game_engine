@@ -1,7 +1,26 @@
 #pragma once
-#include "CommonStructs.h"
+#include "Common.h"
+#include "Object.h"
+#include "Shader.h"
 #include <glm/glm.hpp>
+#include <memory>
 #include <vector>
+
+using std::vector;
+
+class Sphere : public Object {
+
+public:
+  Sphere(float radius, unsigned int sectorCount, unsigned int stackCount);
+  ~Sphere();
+  void draw() override;
+
+private:
+  auto generateSphere(float radius, unsigned int sectorCount,
+                      unsigned int stackCount) -> vector<Vertex>;
+  class Impl;
+  std::unique_ptr<Impl> resources;
+};
 
 using glm::vec3, glm::vec2, std::vector;
 
