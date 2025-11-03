@@ -18,12 +18,17 @@ public:
 private:
   auto generateSphere(float radius, unsigned int sectorCount,
                       unsigned int stackCount) -> vector<Vertex>;
+
+  auto generateVertexArray(float radius, unsigned int sectorCount,
+                           unsigned int stackCount) -> VertexArray;
   class Impl;
   std::unique_ptr<Impl> resources;
 };
 
 using glm::vec3, glm::vec2, std::vector;
 
+auto generateVertexArray(float radius, unsigned int sectorCount,
+                         unsigned int stackCount) -> VertexArray;
 std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
                                    unsigned int stackCount);
 std::vector<Vertex> generatePlane(float width, float depth,

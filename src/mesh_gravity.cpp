@@ -75,20 +75,44 @@ int main(int argc, char *argv[]) {
 
   // Sphere setup
   auto sphereVerts = generateSphere(0.5f, 36, 18);
-  GLuint sphereVAO, sphereVBO;
+  auto va = generateVertexArray(0.5f, 36, 18);
+  auto indices = generateIndices(36, 18);
+
+  GLuint sphereVAO, sphereVBO, sphereEBO;
   glGenVertexArrays(1, &sphereVAO);
   glGenBuffers(1, &sphereVBO);
+  glGenBuffers(1, &sphereEBO);
+
   glBindVertexArray(sphereVAO);
+
+  // upload vertex data
+  size_t vertexCount = (36 + 1) * (18 + 1);
+  size_t totalBytes = (reinterpret_cast<uintptr_t>(va.texCoords + vertexCount) -
+                       reinterpret_cast<uintptr_t>(va.begin));
+
   glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
-  glBufferData(GL_ARRAY_BUFFER, sphereVerts.size() * sizeof(Vertex),
-               sphereVerts.data(), GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+  glBufferData(GL_ARRAY_BUFFER, totalBytes, va.begin, GL_STATIC_DRAW);
+
+  // upload index data
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+               indices.data(), GL_STATIC_DRAW);
+
+  // attribute pointers
+  auto base = reinterpret_cast<uintptr_t>(va.begin);
+  glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(va.position) - base));
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)offsetof(Vertex, normal));
+
+  glVertexAttribPointer(
+      1, 3, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(va.normal) - base));
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void *)offsetof(Vertex, texCoords));
+
+  glVertexAttribPointer(
+      2, 2, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(va.texCoords) - base));
   glEnableVertexAttribArray(2);
 
   MeshPlane mesh{30.0f, 30.0f, 300u, 300u, 0.0f, 0.98f};
@@ -175,6 +199,7 @@ int main(int argc, char *argv[]) {
       nbFrames = 0;
       lastTime = time;
       std::cout << "FPS: " << fps << '\n';
+      std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
     }
 
     // Animate lights
@@ -203,7 +228,8 @@ int main(int argc, char *argv[]) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sphereTexture);
     glBindVertexArray(sphereVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),
+                   GL_UNSIGNED_INT, 0);
 
     // === Draw mesh plane ===
     mesh.getShader().useShader();
@@ -227,7 +253,8 @@ int main(int argc, char *argv[]) {
     glBindTexture(GL_TEXTURE_2D, sphereTexture2);
     lightShader.setInt(l_texLoc, 1);
     glBindVertexArray(sphereVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),
+                   GL_UNSIGNED_INT, 0);
 
     // === Draw second light ===
     lightShader2.useShader();
@@ -241,7 +268,8 @@ int main(int argc, char *argv[]) {
     glBindTexture(GL_TEXTURE_2D, sphereTexture3);
     lightShader2.setInt(l2_texLoc, 2);
     glBindVertexArray(sphereVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sphereVerts.size()));
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),
+                   GL_UNSIGNED_INT, 0);
 
     glfwPollEvents();
     glfwSwapBuffers(window);

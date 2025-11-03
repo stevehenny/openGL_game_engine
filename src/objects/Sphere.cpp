@@ -10,6 +10,7 @@ std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
                                    unsigned int stackCount) {
   std::vector<Vertex> vertices;
 
+  VertexArray vertexArray;
   for (unsigned int i = 0; i <= stackCount; ++i) {
     float stackAngle =
         glm::pi<float>() / 2 - (float)i * glm::pi<float>() / stackCount;
@@ -51,6 +52,41 @@ std::vector<Vertex> generateSphere(float radius, unsigned int sectorCount,
   }
 
   return sphereTriangles;
+}
+
+VertexArray generateVertexArray(float radius, unsigned int sectorCount,
+                                unsigned int stackCount) {
+  // Number of vertices
+  size_t vertexCount = (stackCount + 1) * (sectorCount + 1);
+  VertexArray vertexArray;
+  vertexArray.resize(vertexCount);
+
+  // --- Fill vertex data ---
+  size_t index = 0;
+  for (unsigned int i = 0; i <= stackCount; ++i) {
+    float stackAngle =
+        glm::pi<float>() / 2 - (float)i * glm::pi<float>() / stackCount;
+    float xy = radius * cosf(stackAngle);
+    float z = radius * sinf(stackAngle);
+
+    for (unsigned int j = 0; j <= sectorCount; ++j, ++index) {
+      float sectorAngle = (float)j * 2 * glm::pi<float>() / sectorCount;
+      float x = xy * cosf(sectorAngle);
+      float y = xy * sinf(sectorAngle);
+
+      vec3 pos = vec3(x, y, z);
+      vec3 norm = glm::normalize(pos);
+      vec2 tex = vec2((float)j / sectorCount, (float)i / stackCount);
+
+      vertexArray.position[index] = pos;
+      vertexArray.prevPos[index] = pos; // can initialize same as position
+      vertexArray.normal[index] = norm;
+      vertexArray.force[index] = vec3(0.0f);
+      vertexArray.texCoords[index] = tex;
+    }
+  }
+
+  return vertexArray;
 }
 
 // -------------------- PLANE --------------------
