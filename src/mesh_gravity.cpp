@@ -199,7 +199,8 @@ int main(int argc, char *argv[]) {
       nbFrames = 0;
       lastTime = time;
       std::cout << "FPS: " << fps << '\n';
-      std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
+      // std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
+      // std::cout << "Sizeof vec3: " << sizeof(vec3) << '\n';
     }
 
     // Animate lights
