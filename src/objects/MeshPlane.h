@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Object.h"
 #include "Shader.h"
+#include "Spheres.h"
 #include "glad/glad.h"
 #include "top_level_include.h"
 #include <glm/glm.hpp>
@@ -19,7 +20,7 @@ public:
   void update();
   vec3 getLocation() const;
   Shader &getShader() const;
-  void updateSBBO(vector<GravityObject> &objects) const;
+  void updateSBBO(vector<Sphere> &objects) const;
 
 private:
   auto generateVertices(double width, double depth) -> vector<Vertex>;

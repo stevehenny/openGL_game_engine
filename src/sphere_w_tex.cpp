@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
-#include "Sphere.h"
+#include "Spheres.h"
 #include "Texture.h"
 #include "window_functions.h"
 #include <GLFW/glfw3.h>

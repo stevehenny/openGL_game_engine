@@ -32,18 +32,16 @@ add_executable(light_source
 )
 
 
-add_executable(sphere_practice
-    sphere.cpp
-    glad.c
-)
 
-add_executable(sphere_texture
-    sphere_w_tex.cpp
-    glad.c
-)
 
 add_executable(mesh_gravity
     mesh_gravity.cpp 
+    glad.c
+)
+
+
+add_executable(spheres
+    spheres.cpp 
     glad.c
 )
 
@@ -69,9 +67,8 @@ set(COMMON_LIBS
 
 target_link_libraries(camera_translations PRIVATE ${COMMON_LIBS})
 target_link_libraries(light_source PRIVATE ${COMMON_LIBS})
-target_link_libraries(sphere_practice PRIVATE ${COMMON_LIBS})
-target_link_libraries(sphere_texture PRIVATE ${COMMON_LIBS})
 target_link_libraries(mesh_gravity PRIVATE ${COMMON_LIBS})
+target_link_libraries(spheres PRIVATE ${COMMON_LIBS})
 
 # -----------------------------------------------------------
 # Platform-specific linking
@@ -80,17 +77,15 @@ if(WIN32)
     # Link against required Win32 system libs
     target_link_libraries(camera_translations PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(light_source PRIVATE opengl32 user32 gdi32 shell32)
-    target_link_libraries(sphere_practice PRIVATE opengl32 user32 gdi32 shell32)
-    target_link_libraries(sphere_texture PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(mesh_gravity PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(spheres PRIVATE opengl32 user32 gdi32 shell32)
 
 else()
     # Link against dl on Linux / WSL
     target_link_libraries(camera_translations PRIVATE dl m)
     target_link_libraries(light_source PRIVATE dl m)
-    target_link_libraries(sphere_practice PRIVATE dl m)
-    target_link_libraries(sphere_texture PRIVATE dl m)
     target_link_libraries(mesh_gravity PRIVATE dl m)
+    target_link_libraries(spheres PRIVATE dl m)
 
 endif()
 

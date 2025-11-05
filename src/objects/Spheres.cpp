@@ -1,0 +1,195 @@
+#include "Spheres.h"
+#include "ShaderProgram.h"
+#include "ShaderPrograms.h"
+#include "top_level_include.h"
+#include <cmath>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
+using glm::vec3, glm::vec2;
+
+///*************SPHERE CLASS**************
+class Spheres::Impl {
+public:
+  Impl()
+      : shader(Shader{
+            ShaderProgram{compiled_shaders::SPHERES_VERT, ShaderTypes::VERTEX},
+            ShaderProgram{compiled_shaders::SPHERES_FRAG,
+                          ShaderTypes::FRAGMENT}}) {
+    glGenVertexArrays(1, &SpheresVAO);
+    glGenBuffers(1, &SpheresVBO);
+    glGenBuffers(1, &SpheresEBO);
+    glGenBuffers(1, &SpheresSBBO);
+  }
+
+  ~Impl() {
+    glDeleteVertexArrays(1, &SpheresVAO);
+    glDeleteBuffers(1, &SpheresVBO);
+    glDeleteBuffers(1, &SpheresEBO);
+    glDeleteBuffers(1, &SpheresSBBO);
+  }
+
+  // Sphere needs the following:
+  // dataO: For attribute pointers
+  // VBO: For VertexArray data
+  // EBO: For indices -> Tell the GPU what order to draw
+  // shader program: GPU code to draw the sphere
+  GLuint SpheresVAO, SpheresVBO, SpheresEBO, SpheresSBBO;
+  Shader shader;
+};
+
+Spheres::Spheres(float radius, size_t sectorCount, size_t stackCount)
+    : radius(radius), stackCount(stackCount), sectorCount(sectorCount),
+      resources(std::make_unique<Impl>()) {
+
+  // Generate VertexArray and indices for EBO
+  data = this->generateVertexArray();
+  indices = this->generateIndices();
+
+  // implementation of allocating buffers and
+  // setting dataO attribute pointers
+
+  //
+  glBindVertexArray(resources->SpheresVAO);
+
+  // upload vertex data
+  size_t vertexCount = (sectorCount + 1) * (stackCount + 1);
+  size_t totalBytes =
+      (reinterpret_cast<uintptr_t>(data.texCoords + vertexCount) -
+       reinterpret_cast<uintptr_t>(data.begin));
+
+  glBindBuffer(GL_ARRAY_BUFFER, resources->SpheresVBO);
+  glBufferData(GL_ARRAY_BUFFER, totalBytes, data.begin, GL_STATIC_DRAW);
+
+  // upload index data
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, resources->SpheresEBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+               indices.data(), GL_STATIC_DRAW);
+
+  // upload seperate SBBO buffer of seperate
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
+               spheres.data(), GL_DYNAMIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+  // attribute pointers
+  auto base = reinterpret_cast<uintptr_t>(data.begin);
+  glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(data.position) - base));
+  glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(
+      1, 3, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(data.normal) - base));
+  glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(
+      2, 2, GL_FLOAT, GL_FALSE, 0,
+      (void *)(reinterpret_cast<uintptr_t>(data.texCoords) - base));
+  glEnableVertexAttribArray(2);
+}
+
+Spheres::~Spheres() = default;
+
+void Spheres::renderSphere() {}
+void Spheres::draw() {
+  glBindVertexArray(resources->SpheresVAO);
+  glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),
+                          GL_UNSIGNED_INT, 0,
+                          static_cast<GLsizei>(spheres.size()));
+}
+Shader &Spheres::getShader() { return resources->shader; }
+vector<Sphere> &Spheres::getSpheres() { return spheres; }
+VertexArray &Spheres::getVertexArray() { return data; }
+vector<GLuint> &Spheres::getIndices() { return indices; }
+void Spheres::addSphere(const Sphere &sphere) {
+  spheres.push_back(sphere);
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
+  glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, spheres.size() * sizeof(Sphere),
+                  spheres.data());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void Spheres::applyGravity(double dt) {
+
+  // first calcualte the forces;
+  for (auto &body : spheres) {
+  }
+}
+void Spheres::updateSBBO(vector<Sphere> &newSpheres) {
+  spheres = newSpheres;
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
+
+  glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
+               spheres.data(),
+               GL_DYNAMIC_DRAW); // <-- use glBufferData, not SubData
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+auto Spheres::generateVertexArray() -> VertexArray {
+
+  // Number of vertices
+  size_t vertexCount = (stackCount + 1) * (sectorCount + 1);
+  VertexArray vertexArray;
+  vertexArray.resize(vertexCount);
+
+  // --- Fill vertex data ---
+  size_t index = 0;
+  for (unsigned int i = 0; i <= stackCount; ++i) {
+    float stackAngle =
+        glm::pi<float>() / 2 - (float)i * glm::pi<float>() / stackCount;
+    float xy = radius * cosf(stackAngle);
+    float z = radius * sinf(stackAngle);
+
+    for (unsigned int j = 0; j <= sectorCount; ++j, ++index) {
+      float sectorAngle = (float)j * 2 * glm::pi<float>() / sectorCount;
+      float x = xy * cosf(sectorAngle);
+      float y = xy * sinf(sectorAngle);
+
+      vec3 pos = vec3(x, y, z);
+      vec3 norm = glm::normalize(pos);
+      vec2 tex = vec2((float)j / sectorCount, (float)i / stackCount);
+
+      vertexArray.position[index] = pos;
+      vertexArray.prevPos[index] = pos; // can initialize same as position
+      vertexArray.normal[index] = norm;
+      vertexArray.force[index] = vec3(0.0f);
+      vertexArray.texCoords[index] = tex;
+    }
+  }
+
+  return vertexArray;
+}
+
+auto Spheres::generateIndices() -> vector<GLuint> {
+
+  std::vector<GLuint> indices;
+  indices.reserve(sectorCount * stackCount * 6);
+
+  for (unsigned int i = 0; i < stackCount; ++i) {
+    for (unsigned int j = 0; j < sectorCount; ++j) {
+      unsigned int topLeft = i * (sectorCount + 1) + j;
+      unsigned int topRight = topLeft + 1;
+      unsigned int bottomLeft = (i + 1) * (sectorCount + 1) + j;
+      unsigned int bottomRight = bottomLeft + 1;
+
+      // two triangles per quad
+      indices.push_back(topLeft);
+      indices.push_back(bottomLeft);
+      indices.push_back(topRight);
+
+      indices.push_back(topRight);
+      indices.push_back(bottomLeft);
+      indices.push_back(bottomRight);
+    }
+  }
+  return indices;
+}
+
+///*************SPHERE CLASS**************///

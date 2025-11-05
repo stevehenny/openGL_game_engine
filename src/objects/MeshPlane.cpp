@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
-#include "Sphere.h"
+#include "Spheres.h"
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <cstddef>
@@ -218,11 +218,11 @@ void MeshPlane::draw() {
 
 vec3 MeshPlane::getLocation() const { return vec3(0.0f, yPos, 0.0f); }
 Shader &MeshPlane::getShader() const { return resources->shader; }
-void MeshPlane::updateSBBO(vector<GravityObject> &objects) const {
+void MeshPlane::updateSBBO(vector<Sphere> &objects) const {
 
   // define SBBO
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SBBO);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GravityObject) * objects.size(),
+  glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Sphere) * objects.size(),
                objects.data(), GL_DYNAMIC_DRAW);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resources->SBBO);
 }

@@ -5,7 +5,7 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
-#include "Sphere.h"
+#include "Spheres.h"
 #include "TextRender.h"
 #include "Texture.h"
 #include "external/stb/stb_easy_font.h"
@@ -74,9 +74,10 @@ int main(int argc, char *argv[]) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // Sphere setup
-  auto sphereVerts = generateSphere(0.5f, 36, 18);
-  auto va = generateVertexArray(0.5f, 36, 18);
-  auto indices = generateIndices(36, 18);
+  // auto va = generateVertexArray(0.5f, 36, 18);
+  // auto indices = generateIndices(36, 18);
+  VertexArray va;
+  vector<unsigned int> indices;
 
   GLuint sphereVAO, sphereVBO, sphereEBO;
   glGenVertexArrays(1, &sphereVAO);
@@ -182,7 +183,7 @@ int main(int argc, char *argv[]) {
   vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
   vec3 lightPos2 = vec3(-1.2f, -1.0f, -2.0f);
   vector<vec3> objPos = {earthLoc, lightPos, lightPos2};
-  vector<float> masses = {1e12, 1e11, 1e10};
+  vector<float> masses = {1e12, 1e11, 1e11};
   vector<GravityObject> objects = {GravityObject{objPos[0], masses[0]},
                                    GravityObject{objPos[1], masses[1]},
                                    GravityObject{objPos[2], masses[2]}};
@@ -234,7 +235,7 @@ int main(int argc, char *argv[]) {
 
     // === Draw mesh plane ===
     mesh.getShader().useShader();
-    mesh.updateSBBO(objects);
+    // mesh.updateSBBO(objects);
     mat4 planeModel = glm::translate(mat4(1.0f), mesh.getLocation());
     mesh.getShader().setMat4(planeModelLoc, planeModel);
     mesh.getShader().setMat4(planeViewLoc, camera.get_view_matrix());
