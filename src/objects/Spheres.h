@@ -36,8 +36,10 @@ public:
   VertexArray &getVertexArray();
   vector<GLuint> &getIndices();
   void addSphere(const Sphere &sphere);
-  void applyGravity(double dt);
+  void computeForces();
+  void applyGravity(float dt);
   void updateSBBO(vector<Sphere> &spheres);
+  void updateSBBO();
 
 private:
   auto generateVertexArray() -> VertexArray;

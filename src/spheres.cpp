@@ -126,6 +126,10 @@ int main(int argc, char *argv[]) {
       Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f), vec4(0.0f), 1.0f, 1e13});
   spheres.updateSBBO(sphereData);
 
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 10.0f, 1.0f),
+                              vec4(0.0f), vec4(0.0f), 1.0f, 1e13});
+  spheres.updateSBBO(sphereData);
+  float dt = 0.00001f;
   mesh.updateSBBO(sphereData);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -145,10 +149,11 @@ int main(int argc, char *argv[]) {
     }
 
     // Animate lights
-    sphereData[0].position =
-        vec4(sin(time) * 1.0f, 2.0f, cos(time) * 1.0f, 1.0f);
-    spheres.updateSBBO(sphereData);
-    mesh.updateSBBO(sphereData);
+    // sphereData[0].position =
+    //     vec4(sin(time) * 1.0f, 2.0f, cos(time) * 1.0f, 1.0f);
+    spheres.applyGravity(dt);
+    spheres.updateSBBO();
+    mesh.updateSBBO(spheres.getSpheres());
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

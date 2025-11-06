@@ -114,14 +114,59 @@ void Spheres::addSphere(const Sphere &sphere) {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Spheres::applyGravity(double dt) {
-
-  // first calcualte the forces;
+void Spheres::computeForces() {
   for (auto &body : spheres) {
+    // initialize vector to zero vec4
+    body.force = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    for (size_t i{0}; i < spheres.size(); ++i) {
+      for (size_t j{0}; j < spheres.size(); ++j) {
+        if (i == j)
+          continue;
+
+        // find distance between the two bodies (raidus)
+        vec3 r_vec = vec3(spheres[j].position - spheres[i].position);
+        float r_mag = glm::length(r_vec);
+        if (r_mag == 0)
+          continue; // don't need to waste time with further computation
+
+        vec3 force_dir = r_vec / r_mag;
+        float force_mag = physics_constants::G * spheres[i].mass *
+                          spheres[j].mass / (r_mag * r_mag);
+        vec3 f_vec = force_mag * force_dir;
+
+        spheres[i].force += vec4(f_vec, 1.0);
+      }
+    }
   }
 }
+
+void Spheres::applyGravity(float dt) {
+  // take forces from compute forces and update postions by applying gravity
+  computeForces();
+  for (auto &body : spheres) {
+    glm::vec3 acceleration = glm::vec3(body.force) / body.mass;
+    body.velocity += glm::vec4(acceleration * dt, 0.0);
+    body.position += glm::vec4(glm::vec3(body.velocity) * dt, 0.0);
+    body.position.w = 1.0; // keep w fixed
+    body.velocity.w = 1.0;
+    body.force.w = 1.0;
+  }
+}
+
 void Spheres::updateSBBO(vector<Sphere> &newSpheres) {
   spheres = newSpheres;
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
+
+  glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
+               spheres.data(),
+               GL_DYNAMIC_DRAW); // <-- use glBufferData, not SubData
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void Spheres::updateSBBO() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
 
   glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
