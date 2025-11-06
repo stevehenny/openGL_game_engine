@@ -20,6 +20,7 @@ public:
     glGenBuffers(1, &SpheresVBO);
     glGenBuffers(1, &SpheresEBO);
     glGenBuffers(1, &SpheresSBBO);
+    glGenBuffers(1, &SpheresTexturesSBBO);
   }
 
   ~Impl() {
@@ -27,6 +28,7 @@ public:
     glDeleteBuffers(1, &SpheresVBO);
     glDeleteBuffers(1, &SpheresEBO);
     glDeleteBuffers(1, &SpheresSBBO);
+    glDeleteBuffers(1, &SpheresTexturesSBBO);
   }
 
   // Sphere needs the following:
@@ -34,7 +36,7 @@ public:
   // VBO: For VertexArray data
   // EBO: For indices -> Tell the GPU what order to draw
   // shader program: GPU code to draw the sphere
-  GLuint SpheresVAO, SpheresVBO, SpheresEBO, SpheresSBBO;
+  GLuint SpheresVAO, SpheresVBO, SpheresEBO, SpheresSBBO, SpheresTexturesSBBO;
   Shader shader;
 };
 
@@ -146,8 +148,8 @@ void Spheres::applyGravity(float dt) {
   computeForces();
   for (auto &body : spheres) {
     glm::vec3 acceleration = glm::vec3(body.force) / body.mass;
-    body.velocity += glm::vec4(acceleration * dt, 0.0);
-    body.position += glm::vec4(glm::vec3(body.velocity) * dt, 0.0);
+    body.velocity += glm::vec4(acceleration * dt, 1.0);
+    body.position += glm::vec4(glm::vec3(body.velocity) * dt, 1.0);
     body.position.w = 1.0; // keep w fixed
     body.velocity.w = 1.0;
     body.force.w = 1.0;
@@ -170,10 +172,19 @@ void Spheres::updateSBBO() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
 
   glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
-               spheres.data(),
-               GL_DYNAMIC_DRAW); // <-- use glBufferData, not SubData
+               spheres.data(), GL_DYNAMIC_DRAW);
 
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void Spheres::updateTextures(vector<GLuint> &newTextures) {
+  textures = newTextures;
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresTexturesSBBO);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, textures.size() * sizeof(GLuint),
+               textures.data(), GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 20,
+                   resources->SpheresTexturesSBBO);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 

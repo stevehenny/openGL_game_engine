@@ -9,13 +9,14 @@ layout(location = 1) out vec3 FragPos;
 layout(location = 2) out vec2 TexCoord;
 layout(location = 3) flat out int sphereIndex;
 
-struct  Sphere {
+struct Sphere {
   vec4 objectColor;
   vec4 position;
   vec4 force;
   vec4 velocity;
   float radius;
   float mass;
+  int textureInd;
 };
 
 layout(std430, binding = 3) buffer SphereBuffer {

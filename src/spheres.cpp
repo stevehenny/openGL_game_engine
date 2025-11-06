@@ -60,6 +60,11 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  // check to verify binding bindless textures is compatible
+  // if(!GLAD_GL_ARB_bindless_texture){
+  //
+  // }
+
   Camera camera{vec3(0.0f, 0.0f, 3.0f),
                 vec3(0.f, 0.f, -1.f),
                 vec3(0.f, 1.f, 0.f),
@@ -75,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   Spheres spheres{1.0f, 36, 18};
 
-  MeshPlane mesh{30.0f, 30.0f, 30u, 30u, 0.0f, 0.98f};
+  MeshPlane mesh{300.0f, 300.0f, 300u, 300u, 0.0f, 0.98f};
 
   Shader lightShader{ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_VERT,
                                    ShaderTypes::VERTEX},
@@ -86,9 +91,14 @@ int main(int argc, char *argv[]) {
                       ShaderProgram{compiled_shaders::LIGHT_W_TEXTURE_FRAG,
                                     ShaderTypes::FRAGMENT}};
 
-  unsigned int sphereTexture = loadTexture(texturePath);
-  unsigned int sphereTexture2 = loadTexture(texture2Path);
-  unsigned int sphereTexture3 = loadTexture(texture3Path);
+  // update bindless textures
+  GLuint texture1, texture2, texture3;
+
+  texture1 = loadTexture(texturePath);
+  texture2 = loadTexture(texture2Path);
+  texture3 = loadTexture(texture3Path);
+
+  vector<GLuint> textures = {texture1, texture2, texture3};
 
   // --- Cache uniform locations for object shader ---
   spheres.getShader().useShader();
@@ -105,6 +115,7 @@ int main(int argc, char *argv[]) {
   int lightPos2Loc = glGetUniformLocation(spheres.getShader().ID, "lightPos2");
   int viewPosLoc = glGetUniformLocation(spheres.getShader().ID, "viewPos");
   int texLoc = glGetUniformLocation(spheres.getShader().ID, "texture1");
+  int texturesLoc = glGetUniformLocation(spheres.getShader().ID, "textures");
 
   mesh.getShader().useShader();
   int planeModelLoc = glGetUniformLocation(mesh.getShader().ID, "model");
@@ -122,14 +133,20 @@ int main(int argc, char *argv[]) {
   int nbFrames = 0;
 
   vector<Sphere> sphereData;
-  sphereData.push_back(
-      Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f), vec4(0.0f), 1.0f, 1e13});
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f),
+                              vec4(-3.0f, 0.0f, -3.0f, 1.0f), 1.0f, 1e13});
   spheres.updateSBBO(sphereData);
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 10.0f, 1.0f),
-                              vec4(0.0f), vec4(0.0f), 1.0f, 1e13});
+                              vec4(0.0f), vec4(3.0f, -0.5f, 3.0f, 1.0f), 1.0f,
+                              1e13});
+
+  //                             vec4(0.0f), vec4(-3.0f, 0.0f, 3.0f,
+  // sphereData.push_back(Sphere{vec4(1.0f), vec4(10.0f, 1.0f, 1.0f, 1.0f),
+  //                             0.0f), 1.0f, 1e13});
+
   spheres.updateSBBO(sphereData);
-  float dt = 0.00001f;
+  float dt = 0.0001f;
   mesh.updateSBBO(sphereData);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -171,8 +188,8 @@ int main(int argc, char *argv[]) {
     spheres.getShader().setVec3(viewPosLoc, camera.get_position());
     spheres.getShader().setInt(texLoc, 0);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sphereTexture);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, sphereTexture);
     spheres.draw();
     // glBindVertexArray(sphereVAO);
     // glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),

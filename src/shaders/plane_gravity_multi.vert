@@ -16,6 +16,7 @@ struct  Sphere {
   vec4 velocity;
   float radius;
   float mass;
+  int textureInd;
 };
 
 // Uniforms
@@ -28,6 +29,12 @@ layout(location = 13) uniform int numObjects;
 layout(std430, binding = 0) buffer GravityBuffer {
     Sphere objs[];
 };
+
+
+
+// layout(std430, binding = 1) buffer textureBuffer{
+//     uniform sampler2D textures[];
+// };
 
 // Gravity parameters
 const float EPS = 0.5;

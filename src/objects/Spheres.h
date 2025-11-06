@@ -20,6 +20,7 @@ struct alignas(16) Sphere {
   vec4 velocity;
   float radius;
   float mass;
+  int textureInd;
 };
 
 // Factory class for generating Spheres
@@ -40,6 +41,7 @@ public:
   void applyGravity(float dt);
   void updateSBBO(vector<Sphere> &spheres);
   void updateSBBO();
+  void updateTextures(vector<GLuint> &texutres);
 
 private:
   auto generateVertexArray() -> VertexArray;
@@ -50,6 +52,7 @@ private:
   VertexArray data;
   vector<GLuint> indices;
   vector<Sphere> spheres;
+  vector<GLuint> textures;
   class Impl;
   std::unique_ptr<Impl> resources;
 };
