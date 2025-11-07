@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
 
   // --- Cache uniform locations for object shader ---
   spheres.getShader().useShader();
+  // spheres.updateTextures(textures);
   int modelLoc = glGetUniformLocation(spheres.getShader().ID, "model");
   int viewLoc = glGetUniformLocation(spheres.getShader().ID, "view");
   int projLoc = glGetUniformLocation(spheres.getShader().ID, "projection");
@@ -134,12 +135,12 @@ int main(int argc, char *argv[]) {
 
   vector<Sphere> sphereData;
   sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f),
-                              vec4(-3.0f, 0.0f, -3.0f, 1.0f), 1.0f, 1e13});
+                              vec4(-3.0f, 0.0f, -3.0f, 1.0f), 1.0f, 1e13, 1});
   spheres.updateSBBO(sphereData);
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 10.0f, 1.0f),
-                              vec4(0.0f), vec4(3.0f, -0.5f, 3.0f, 1.0f), 1.0f,
-                              1e13});
+                              vec4(0.0f), vec4(3.0f, -0.0f, 3.0f, 1.0f), 1.0f,
+                              1e13, 2});
 
   //                             vec4(0.0f), vec4(-3.0f, 0.0f, 3.0f,
   // sphereData.push_back(Sphere{vec4(1.0f), vec4(10.0f, 1.0f, 1.0f, 1.0f),
@@ -148,6 +149,7 @@ int main(int argc, char *argv[]) {
   spheres.updateSBBO(sphereData);
   float dt = 0.0001f;
   mesh.updateSBBO(sphereData);
+  spheres.getShader().setUniformTextures(texturesLoc, textures);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     float time = glfwGetTime();
@@ -161,6 +163,8 @@ int main(int argc, char *argv[]) {
       nbFrames = 0;
       lastTime = time;
       std::cout << "FPS: " << fps << '\n';
+      std::cout << "Texture array loc: " << texturesLoc << '\n';
+      // std::cout << "View Pos: " << lightColorLoc << '\n';
       // std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
       // std::cout << "Sizeof vec3: " << sizeof(vec3) << '\n';
     }
@@ -188,8 +192,8 @@ int main(int argc, char *argv[]) {
     spheres.getShader().setVec3(viewPosLoc, camera.get_position());
     spheres.getShader().setInt(texLoc, 0);
 
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, sphereTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
     spheres.draw();
     // glBindVertexArray(sphereVAO);
     // glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),

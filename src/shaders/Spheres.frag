@@ -20,7 +20,7 @@ layout(std430, binding = 3) buffer SphereBuffer {
     Sphere spheres[];
 };
 
-
+const int NUM_TEX = 128;
 
 layout(location = 14) uniform sampler2D texture1;
 layout(location = 15) uniform vec3 lightColor;
@@ -28,7 +28,7 @@ layout(location = 16) uniform vec3 lightPos;
 layout(location = 17) uniform vec3 lightColor2;
 layout(location = 18) uniform vec3 lightPos2;
 layout(location = 19) uniform vec3 viewPos;
-layout(location = 20) uniform sampler2DArray textures;
+layout(location = 20) uniform sampler2D textures[NUM_TEX];
 
 vec3 computeLighting(vec3 lightPos, vec3 lightColor, vec3 baseColor)
 {
@@ -48,10 +48,10 @@ vec3 computeLighting(vec3 lightPos, vec3 lightColor, vec3 baseColor)
 
 void main()
 {
-    vec4 texColor = texture(texture1, TexCoord);
+    vec4 texColor = texture(textures[spheres[sphereIndex].textureInd], TexCoord);
     vec3 baseColor = texColor.rgb * spheres[sphereIndex].objectColor.rgb;
     vec3 result = baseColor;
-    // vec3 result = computeLighting(lightPos, lightColor, baseColor);
+    // result += computeLighting(lightPos, lightColor, baseColor);
     // result += computeLighting(lightPos2, lightColor2, baseColor);
     FragColor = vec4(result, texColor.a);
 }

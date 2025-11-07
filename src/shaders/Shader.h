@@ -1,7 +1,9 @@
 #pragma once
+#include "top_level_include.h"
 #include <glm/glm.hpp>
 #include <string>
-
+#include <vector>
+using std::vector;
 class ShaderProgram; // forward declaration
 
 class Shader {
@@ -30,4 +32,7 @@ public:
   void setMat2(unsigned int location, const glm::mat2 &mat) const;
   void setMat3(unsigned int location, const glm::mat3 &mat) const;
   void setMat4(unsigned int location, const glm::mat4 &mat) const;
+
+  void setUniformTextures(unsigned int location,
+                          vector<GLuint> &textures) const;
 };

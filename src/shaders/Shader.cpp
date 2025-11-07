@@ -82,3 +82,8 @@ void Shader::setMat3(unsigned int location, const glm::mat3 &mat) const {
 void Shader::setMat4(unsigned int location, const glm::mat4 &mat) const {
   glProgramUniformMatrix4fv(ID, location, 1, GL_FALSE, glm::value_ptr(mat));
 }
+
+void Shader::setUniformTextures(unsigned int location,
+                                vector<GLuint> &textures) const {
+  glUniform4uiv(location, textures.size(), textures.data());
+}

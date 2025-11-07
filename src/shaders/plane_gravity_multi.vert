@@ -32,9 +32,6 @@ layout(std430, binding = 0) buffer GravityBuffer {
 
 
 
-// layout(std430, binding = 1) buffer textureBuffer{
-//     uniform sampler2D textures[];
-// };
 
 // Gravity parameters
 const float EPS = 0.5;
