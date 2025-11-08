@@ -178,11 +178,10 @@ void Spheres::updateSBBO() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Spheres::updateTextures(vector<GLuint> &newTextures) {
-  textures = newTextures;
+void Spheres::updateTextures(std::vector<GLuint64> &handles) {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresTexturesSBBO);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, textures.size() * sizeof(GLuint),
-               textures.data(), GL_STATIC_DRAW);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, handles.size() * sizeof(GLuint64),
+               handles.data(), GL_STATIC_DRAW);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 20,
                    resources->SpheresTexturesSBBO);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

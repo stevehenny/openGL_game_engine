@@ -60,6 +60,10 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  if (!GLAD_GL_ARB_bindless_texture) {
+    std::cerr << "Error: ARB_bindless_texture not supported on this GPU.\n";
+    exit(1);
+  }
   // check to verify binding bindless textures is compatible
   // if(!GLAD_GL_ARB_bindless_texture){
   //
@@ -93,13 +97,23 @@ int main(int argc, char *argv[]) {
 
   // update bindless textures
   GLuint texture1, texture2, texture3;
+  std::vector<const char *> textures = {texturePath, texture2Path,
+                                        texture3Path};
+  GLuint textureArray = loadTextureArray(textures);
+  // texture1 = loadTexture(texturePath);
+  // texture2 = loadTexture(texture2Path);
+  // texture3 = loadTexture(texture3Path);
 
-  texture1 = loadTexture(texturePath);
-  texture2 = loadTexture(texture2Path);
-  texture3 = loadTexture(texture3Path);
+  // vector<GLuint> textures = {texture1, texture2, texture3};
 
-  vector<GLuint> textures = {texture1, texture2, texture3};
+  std::vector<GLuint64> textureHandles;
+  for (GLuint tex : {texture1, texture2, texture3}) {
+    GLuint64 handle = glGetTextureHandleARB(tex);
+    glMakeTextureHandleResidentARB(handle);
+    textureHandles.push_back(handle);
+  }
 
+  // spheres.updateTextures(textureHandles);
   // --- Cache uniform locations for object shader ---
   spheres.getShader().useShader();
   // spheres.updateTextures(textures);
@@ -117,6 +131,10 @@ int main(int argc, char *argv[]) {
   int viewPosLoc = glGetUniformLocation(spheres.getShader().ID, "viewPos");
   int texLoc = glGetUniformLocation(spheres.getShader().ID, "texture1");
   int texturesLoc = glGetUniformLocation(spheres.getShader().ID, "textures");
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+  spheres.getShader().setInt(texturesLoc, 0);
 
   mesh.getShader().useShader();
   int planeModelLoc = glGetUniformLocation(mesh.getShader().ID, "model");
@@ -149,7 +167,7 @@ int main(int argc, char *argv[]) {
   spheres.updateSBBO(sphereData);
   float dt = 0.0001f;
   mesh.updateSBBO(sphereData);
-  spheres.getShader().setUniformTextures(texturesLoc, textures);
+  // spheres.getShader().setUniformTextures(texturesLoc, textures);
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     float time = glfwGetTime();
@@ -210,5 +228,9 @@ int main(int argc, char *argv[]) {
     mesh.draw();
 
     glfwSwapBuffers(window);
+  }
+
+  for (auto handle : textureHandles) {
+    glad_glMakeTextureHandleNonResidentARB(handle);
   }
 }

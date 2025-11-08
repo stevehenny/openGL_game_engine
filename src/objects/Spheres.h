@@ -41,7 +41,7 @@ public:
   void applyGravity(float dt);
   void updateSBBO(vector<Sphere> &spheres);
   void updateSBBO();
-  void updateTextures(vector<GLuint> &texutres);
+  void updateTextures(vector<GLuint64> &texutres);
 
 private:
   auto generateVertexArray() -> VertexArray;
