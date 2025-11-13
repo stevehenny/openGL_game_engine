@@ -12,10 +12,10 @@ using glm::vec3, glm::vec2;
 class Spheres::Impl {
 public:
   Impl()
-      : shader(Shader{
-            ShaderProgram{compiled_shaders::SPHERES_VERT, ShaderTypes::VERTEX},
-            ShaderProgram{compiled_shaders::SPHERES_FRAG,
-                          ShaderTypes::FRAGMENT}}) {
+      : shader(Shader{ShaderProgram{compiled_shaders::SPHERES_GPU_VERT,
+                                    ShaderTypes::VERTEX},
+                      ShaderProgram{compiled_shaders::SPHERES_GPU_FRAG,
+                                    ShaderTypes::FRAGMENT}}) {
     glGenVertexArrays(1, &SpheresVAO);
     glGenBuffers(1, &SpheresVBO);
     glGenBuffers(1, &SpheresEBO);
@@ -193,11 +193,13 @@ void Spheres::updateSBBO(vector<Sphere> &newSpheres) {
 void Spheres::updateSBBO() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);
 
-  glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
-               spheres.data(), GL_DYNAMIC_DRAW);
-
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+  glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
+                     spheres.size() * sizeof(Sphere), spheres.data());
+  // glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere),
+  //              spheres.data(), GL_DYNAMIC_DRAW);
+  //
+  // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  // glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void Spheres::updateTextures(std::vector<GLuint64> &handles) {

@@ -131,6 +131,8 @@ int main(int argc, char *argv[]) {
   int viewPosLoc = glGetUniformLocation(spheres.getShader().ID, "viewPos");
   int texLoc = glGetUniformLocation(spheres.getShader().ID, "texture1");
   int texturesLoc = glGetUniformLocation(spheres.getShader().ID, "textures");
+  int numSpheresLoc =
+      glGetUniformLocation(spheres.getShader().ID, "numSpheres");
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
@@ -152,13 +154,17 @@ int main(int argc, char *argv[]) {
   int nbFrames = 0;
 
   vector<Sphere> sphereData;
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f),
-                              vec4(-3.0f, 0.0f, -3.0f, 1.0f), 1.0f, 1e13, 1});
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(20.0f, 1.0f, -20.0f, 1.0f),
+                              vec4(0.0f), vec4(-100.0f, 0.0f, -100.0f, 1.0f),
+                              1.0f, 1e13, 1});
 
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 20.0f, 1.0f),
-                              vec4(0.0f), vec4(5.0f, -0.0f, 5.0f, 1.0f), 1.0f,
-                              1e13, 0});
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(-20.0f, 1.0f, 20.0f, 1.0f),
+                              vec4(0.0f), vec4(100.0f, -0.0f, 100.0f, 1.0f),
+                              1.0f, 1e13, 0});
 
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(40.0f, 1.0f, -40.0f, 1.0f),
+                              vec4(0.0f), vec4(100.0f, -0.0f, 100.0f, 1.0f),
+                              1.0f, 1e13, 0});
   // for (int i = 0; i < 10; ++i) {
   //   sphereData.push_back(Sphere{
   //       vec4(1.0f),
@@ -190,16 +196,13 @@ int main(int argc, char *argv[]) {
       std::cout << "FPS: " << fps << '\n';
       std::cout << "Texture array loc: " << texturesLoc << '\n';
 
-      std::cout << "Total Energy: " << spheres.computeTotalEnergy() << '\n';
+      // std::cout << "Total Energy: " << spheres.computeTotalEnergy() << '\n';
       // std::cout << "View Pos: " << lightColorLoc << '\n';
       // std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
       // std::cout << "Sizeof vec3: " << sizeof(vec3) << '\n';
     }
 
-    // Animate lights
-    // sphereData[0].position =
-    //     vec4(sin(time) * 1.0f, 2.0f, cos(time) * 1.0f, 1.0f);
-    spheres.applyGravity(dt);
+    // spheres.applyGravity(dt);
     spheres.updateSBBO();
     mesh.updateSBBO(spheres.getSpheres());
 
@@ -218,6 +221,7 @@ int main(int argc, char *argv[]) {
     // spheres.getShader().setVec3(lightPos2Loc, objects[2].position);
     spheres.getShader().setVec3(viewPosLoc, camera.get_position());
     spheres.getShader().setInt(texLoc, 0);
+    spheres.getShader().setInt(numSpheresLoc, spheres.getSpheres().size());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);

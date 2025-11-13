@@ -29,4 +29,6 @@ inline string MULTI_OBJ_PLANE_FRAG =
     SHADER_FOLDER + "plane_gravity_multi.frag.spv";
 inline string SPHERES_VERT = SHADER_FOLDER + "Spheres.vert.spv";
 inline string SPHERES_FRAG = SHADER_FOLDER + "Spheres.frag.spv";
+inline string SPHERES_GPU_VERT = SHADER_FOLDER + "Spheres_GPU.vert.spv";
+inline string SPHERES_GPU_FRAG = SHADER_FOLDER + "Spheres_GPU.frag.spv";
 } // namespace compiled_shaders
