@@ -165,6 +165,11 @@ int main(int argc, char *argv[]) {
   sphereData.push_back(Sphere{vec4(1.0f), vec4(40.0f, 1.0f, -40.0f, 1.0f),
                               vec4(0.0f), vec4(100.0f, -0.0f, 100.0f, 1.0f),
                               1.0f, 1e13, 0});
+
+  for (int i = 0; i < 200; ++i) {
+    sphereData.push_back(Sphere{vec4(1.0f), vec4(-i, 1.0f, i, 1.0f), vec4(0.0f),
+                                vec4(i, -0.0f, i, 1.0f), 1.0f, 1e13, 0});
+  }
   // for (int i = 0; i < 10; ++i) {
   //   sphereData.push_back(Sphere{
   //       vec4(1.0f),
