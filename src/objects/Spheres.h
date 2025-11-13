@@ -38,6 +38,7 @@ public:
   vector<GLuint> &getIndices();
   void addSphere(const Sphere &sphere);
   void computeForces();
+  double computeTotalEnergy();
   void applyGravity(float dt);
   void updateSBBO(vector<Sphere> &spheres);
   void updateSBBO();

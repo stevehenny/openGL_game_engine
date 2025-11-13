@@ -1,5 +1,6 @@
 #version 460 core
 
+
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
@@ -22,9 +23,20 @@ struct Sphere {
 layout(std430, binding = 3) buffer SphereBuffer {
     Sphere spheres[];
 };
-
+layout(location = 10) uniform int numSpheres;
 layout(location = 11) uniform mat4 view;
 layout(location = 12) uniform mat4 projection;
+
+
+void computeForces() {
+  for(int i = 0; i < numSpheres; ++i){
+   for(int j = 0; j < numSpheres; ++j){
+     if(i == j) continue;
+
+
+   } 
+  }
+}
 
 void main()
 {

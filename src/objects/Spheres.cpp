@@ -119,43 +119,65 @@ void Spheres::addSphere(const Sphere &sphere) {
 void Spheres::computeForces() {
   for (auto &body : spheres) {
     // initialize vector to zero vec4
-    body.force = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    body.force = vec4(0.0f);
 
-    for (size_t i{0}; i < spheres.size(); ++i) {
-      for (size_t j{0}; j < spheres.size(); ++j) {
-        if (i == j)
-          continue;
-
-        // find distance between the two bodies (raidus)
+    for (size_t i = 0; i < spheres.size(); ++i) {
+      for (size_t j = i + 1; j < spheres.size(); ++j) {
         vec3 r_vec = vec3(spheres[j].position - spheres[i].position);
         float r_mag = glm::length(r_vec);
         if (r_mag == 0)
-          continue; // don't need to waste time with further computation
+          continue;
 
         vec3 force_dir = r_vec / r_mag;
         float force_mag = physics_constants::G * spheres[i].mass *
                           spheres[j].mass / (r_mag * r_mag);
         vec3 f_vec = force_mag * force_dir;
 
-        spheres[i].force += vec4(f_vec, 1.0);
+        spheres[i].force += vec4(f_vec, 0.0);
+        spheres[j].force -= vec4(f_vec, 0.0);
       }
     }
   }
 }
 
 void Spheres::applyGravity(float dt) {
-  // take forces from compute forces and update postions by applying gravity
   computeForces();
+
   for (auto &body : spheres) {
     glm::vec3 acceleration = glm::vec3(body.force) / body.mass;
-    body.velocity += glm::vec4(acceleration * dt, 1.0);
-    body.position += glm::vec4(glm::vec3(body.velocity) * dt, 1.0);
-    body.position.w = 1.0; // keep w fixed
-    body.velocity.w = 1.0;
-    body.force.w = 1.0;
+    // Half-step velocity update
+    body.velocity += glm::vec4(acceleration * dt * 0.5f, 0.0);
+    body.position += glm::vec4(glm::vec3(body.velocity) * dt, 0.0);
+  }
+  // recompute after moving
+  computeForces();
+
+  for (auto &body : spheres) {
+    glm::vec3 acceleration = glm::vec3(body.force) / body.mass;
+    // Second half-step velocity update
+    body.velocity += glm::vec4(acceleration * dt * 0.5f, 0.0);
   }
 }
 
+double Spheres::computeTotalEnergy() {
+  double kinetic = 0.0;
+  double potential = 0.0;
+
+  for (size_t i = 0; i < spheres.size(); ++i) {
+    const auto &s_i = spheres[i];
+    glm::dvec3 v = glm::dvec3(s_i.velocity);
+    kinetic += 0.5 * s_i.mass * glm::dot(v, v);
+
+    for (size_t j = i + 1; j < spheres.size(); ++j) {
+      glm::dvec3 r = glm::dvec3(spheres[j].position - s_i.position);
+      double dist = glm::length(r);
+      dist = std::max(dist, 1e-6); // softening to avoid singularities
+      potential -= physics_constants::G * s_i.mass * spheres[j].mass / dist;
+    }
+  }
+
+  return kinetic + potential;
+}
 void Spheres::updateSBBO(vector<Sphere> &newSpheres) {
   spheres = newSpheres;
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->SpheresSBBO);

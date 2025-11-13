@@ -60,10 +60,10 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  if (!GLAD_GL_ARB_bindless_texture) {
-    std::cerr << "Error: ARB_bindless_texture not supported on this GPU.\n";
-    exit(1);
-  }
+  // if (!GLAD_GL_ARB_bindless_texture) {
+  //   std::cerr << "Error: ARB_bindless_texture not supported on this GPU.\n";
+  //   exit(1);
+  // }
   // check to verify binding bindless textures is compatible
   // if(!GLAD_GL_ARB_bindless_texture){
   //
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
                 0.1f,
                 0.1f,
                 100.f,
-                2.5f};
+                10.0f};
   glfwSetWindowUserPointer(window, &camera);
   glfwSetCursorPosCallback(window, Camera::mouse_callback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -106,12 +106,12 @@ int main(int argc, char *argv[]) {
 
   // vector<GLuint> textures = {texture1, texture2, texture3};
 
-  std::vector<GLuint64> textureHandles;
-  for (GLuint tex : {texture1, texture2, texture3}) {
-    GLuint64 handle = glGetTextureHandleARB(tex);
-    glMakeTextureHandleResidentARB(handle);
-    textureHandles.push_back(handle);
-  }
+  // std::vector<GLuint64> textureHandles;
+  // for (GLuint tex : {texture1, texture2, texture3}) {
+  //   GLuint64 handle = glGetTextureHandleARB(tex);
+  //   glMakeTextureHandleResidentARB(handle);
+  //   textureHandles.push_back(handle);
+  // }
 
   // spheres.updateTextures(textureHandles);
   // --- Cache uniform locations for object shader ---
@@ -154,11 +154,18 @@ int main(int argc, char *argv[]) {
   vector<Sphere> sphereData;
   sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f), vec4(0.0f),
                               vec4(-3.0f, 0.0f, -3.0f, 1.0f), 1.0f, 1e13, 1});
-  spheres.updateSBBO(sphereData);
 
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 10.0f, 1.0f),
-                              vec4(0.0f), vec4(3.0f, -0.0f, 3.0f, 1.0f), 1.0f,
-                              1e13, 2});
+  sphereData.push_back(Sphere{vec4(1.0f), vec4(1.0f, 1.0f, 20.0f, 1.0f),
+                              vec4(0.0f), vec4(5.0f, -0.0f, 5.0f, 1.0f), 1.0f,
+                              1e13, 0});
+
+  // for (int i = 0; i < 10; ++i) {
+  //   sphereData.push_back(Sphere{
+  //       vec4(1.0f),
+  //       vec4(static_cast<float>(i + 1), 1.0f, static_cast<float>(i +
+  //       1), 1.0f), vec4(0.0f), vec4(0.0f, -0.0f, 0.0f, 1.0f), 1.0f, 1e13,
+  //       0});
+  // }
 
   //                             vec4(0.0f), vec4(-3.0f, 0.0f, 3.0f,
   // sphereData.push_back(Sphere{vec4(1.0f), vec4(10.0f, 1.0f, 1.0f, 1.0f),
@@ -182,6 +189,8 @@ int main(int argc, char *argv[]) {
       lastTime = time;
       std::cout << "FPS: " << fps << '\n';
       std::cout << "Texture array loc: " << texturesLoc << '\n';
+
+      std::cout << "Total Energy: " << spheres.computeTotalEnergy() << '\n';
       // std::cout << "View Pos: " << lightColorLoc << '\n';
       // std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
       // std::cout << "Sizeof vec3: " << sizeof(vec3) << '\n';
@@ -228,9 +237,5 @@ int main(int argc, char *argv[]) {
     mesh.draw();
 
     glfwSwapBuffers(window);
-  }
-
-  for (auto handle : textureHandles) {
-    glad_glMakeTextureHandleNonResidentARB(handle);
   }
 }

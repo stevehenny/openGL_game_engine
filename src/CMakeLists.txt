@@ -45,6 +45,11 @@ add_executable(spheres
     glad.c
 )
 
+add_executable(particle_sim
+  particle_sim.cpp
+  glad.c
+)
+
 # -----------------------------------------------------------
 # OpenGL preference
 # -----------------------------------------------------------
@@ -69,6 +74,7 @@ target_link_libraries(camera_translations PRIVATE ${COMMON_LIBS})
 target_link_libraries(light_source PRIVATE ${COMMON_LIBS})
 target_link_libraries(mesh_gravity PRIVATE ${COMMON_LIBS})
 target_link_libraries(spheres PRIVATE ${COMMON_LIBS})
+target_link_libraries(particle_sim PRIVATE ${COMMON_LIBS})
 
 # -----------------------------------------------------------
 # Platform-specific linking
@@ -79,6 +85,7 @@ if(WIN32)
     target_link_libraries(light_source PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(mesh_gravity PRIVATE opengl32 user32 gdi32 shell32)
     target_link_libraries(spheres PRIVATE opengl32 user32 gdi32 shell32)
+    target_link_libraries(particle_sim PRIVATE opengl32 user32 gdi32 shell32)
 
 else()
     # Link against dl on Linux / WSL
@@ -86,6 +93,7 @@ else()
     target_link_libraries(light_source PRIVATE dl m)
     target_link_libraries(mesh_gravity PRIVATE dl m)
     target_link_libraries(spheres PRIVATE dl m)
+    target_link_libraries(particle_sim PRIVATE dl m)
 
 endif()
 
