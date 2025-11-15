@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <random>
 #include <stb_image.h>
 #include <vector>
 
@@ -155,43 +156,43 @@ int main(int argc, char *argv[]) {
 
   vector<Sphere> sphereData;
   sphereData.push_back(Sphere{vec4(1.0f), vec4(20.0f, 1.0f, -20.0f, 1.0f),
-                              vec4(0.0f), vec4(-100.0f, 0.0f, -100.0f, 1.0f),
-                              1.0f, 1e13, 1});
+                              vec4(0.0f), vec4(-1.0f, 0.0f, -1.0f, 1.0f), 1.0f,
+                              1e13, 1});
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(-20.0f, 1.0f, 20.0f, 1.0f),
-                              vec4(0.0f), vec4(100.0f, -0.0f, 100.0f, 1.0f),
-                              1.0f, 1e13, 0});
+                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f), 1.0f,
+                              1e13, 0});
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(40.0f, 1.0f, -40.0f, 1.0f),
-                              vec4(0.0f), vec4(100.0f, -0.0f, 100.0f, 1.0f),
-                              1.0f, 1e13, 0});
+                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f), 1.0f,
+                              1e13, 0});
 
-  for (int i = 0; i < 300; ++i) {
-    sphereData.push_back(Sphere{vec4(1.0f), vec4(-i, 1.0f, i, 1.0f), vec4(0.0f),
-                                vec4(i, -0.0f, i, 1.0f), 1.0f, 1e13, 0});
+  std::mt19937 uniformEngine(std::random_device{}());
+
+  std::uniform_real_distribution<float> velocity(-1, 1);
+  std::uniform_real_distribution<float> position(-100, 100);
+  for (int i = 0; i < 10; ++i) {
+    sphereData.push_back(Sphere{
+        vec4(1.0f),
+        vec4(position(uniformEngine), 1.0f, position(uniformEngine), 1.0f),
+        vec4(0.0f), vec4(velocity(uniformEngine)), 1.0f, 1e13, 0});
   }
-  // for (int i = 0; i < 10; ++i) {
-  //   sphereData.push_back(Sphere{
-  //       vec4(1.0f),
-  //       vec4(static_cast<float>(i + 1), 1.0f, static_cast<float>(i +
-  //       1), 1.0f), vec4(0.0f), vec4(0.0f, -0.0f, 0.0f, 1.0f), 1.0f, 1e13,
-  //       0});
-  // }
-
-  //                             vec4(0.0f), vec4(-3.0f, 0.0f, 3.0f,
-  // sphereData.push_back(Sphere{vec4(1.0f), vec4(10.0f, 1.0f, 1.0f, 1.0f),
-  //                             0.0f), 1.0f, 1e13});
 
   spheres.updateSBBO(sphereData);
   float dt = 0.0001f;
-  mesh.updateSBBO(sphereData);
+  // mesh.updateSBBO(sphereData);
+  mesh.setSphereSBBO(spheres.getSphereSBBO(), sphereData.size());
   // spheres.getShader().setUniformTextures(texturesLoc, textures);
   while (!glfwWindowShouldClose(window)) {
+
+    //*******CAMERA********//
     glfwPollEvents();
     float time = glfwGetTime();
     camera.update_camera_delta_time(time);
     camera.move_camera(window);
+    //*******CAMERA********//
 
+    //*********FRAMERATE*********//
     nbFrames++;
     double fps = 0.0;
     if (time - lastTime >= 1.0) {
@@ -200,21 +201,20 @@ int main(int argc, char *argv[]) {
       lastTime = time;
       std::cout << "FPS: " << fps << '\n';
       std::cout << "Texture array loc: " << texturesLoc << '\n';
-
-      // std::cout << "Total Energy: " << spheres.computeTotalEnergy() << '\n';
-      // std::cout << "View Pos: " << lightColorLoc << '\n';
-      // std::cout << "Sizeof VertexArray: " << sizeof(VertexArray) << '\n';
-      // std::cout << "Sizeof vec3: " << sizeof(vec3) << '\n';
     }
+    //*********FRAMERATE*********//
 
-    // spheres.applyGravity(dt);
-    spheres.updateSBBO();
-    mesh.updateSBBO(spheres.getSpheres());
+    //*********SPHERE COMPUTE AND SET MESH SBBO*************//
+    spheres.runComputeShader(dt);
+    mesh.updateSBBO_from_GPU();
+    //*********SPHERE COMPUTE AND SET MESH SBBO*************//
 
+    //********CLEAR COLOR AND PREPARE NEXT FRAME************//
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //********CLEAR COLOR AND PREPARE NEXT FRAME************//
 
-    // === Draw main object ===
+    //***********DRAW SPHERES********************//
     spheres.getShader().useShader();
     // spheres.getShader().setMat4(modelLoc, model);
     spheres.getShader().setMat4(viewLoc, camera.get_view_matrix());
@@ -227,16 +227,12 @@ int main(int argc, char *argv[]) {
     spheres.getShader().setVec3(viewPosLoc, camera.get_position());
     spheres.getShader().setInt(texLoc, 0);
     spheres.getShader().setInt(numSpheresLoc, spheres.getSpheres().size());
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
     spheres.draw();
-    // glBindVertexArray(sphereVAO);
-    // glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()),
-    //                GL_UNSIGNED_INT, 0);
+    //***********DRAW SPHERES********************//
 
-    // === Draw mesh plane ===
-    //
+    //******DRAW MESH PLANE************//
     mesh.getShader().useShader();
     mat4 planeModel = glm::translate(mat4(1.0f), mesh.getLocation());
     mesh.getShader().setMat4(planeModelLoc, planeModel);
@@ -244,6 +240,7 @@ int main(int argc, char *argv[]) {
     mesh.getShader().setMat4(planeProjLoc, camera.get_projection_matrix());
     mesh.getShader().setInt(numObjectsLoc, static_cast<int>(sphereData.size()));
     mesh.draw();
+    //******DRAW MESH PLANE************//
 
     glfwSwapBuffers(window);
   }

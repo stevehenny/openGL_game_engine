@@ -33,10 +33,14 @@ public:
   void renderSphere();
   void draw() override;
   Shader &getShader();
+  Shader &getComputeShader();
   vector<Sphere> &getSpheres();
   VertexArray &getVertexArray();
   vector<GLuint> &getIndices();
+  GLuint getSphereSBBO();
   void addSphere(const Sphere &sphere);
+  void runComputeShader(float dt);
+  void bindComputeToSBBO() const;
   void computeForces();
   double computeTotalEnergy();
   void applyGravity(float dt);

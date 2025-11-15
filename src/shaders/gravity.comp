@@ -1,0 +1,54 @@
+#version 460 core
+layout(local_size_x = 256) in;
+
+struct Sphere {
+    vec4 color;
+    vec4 position;
+    vec4 force;
+    vec4 velocity;
+    float radius;
+    float mass;
+    int texIndex;
+};
+
+layout(std430, binding = 3) buffer SphereBuffer {
+    Sphere spheres[];
+};
+
+layout(location =1) uniform float dt;
+layout(location = 2) uniform float G;
+layout(location = 3) uniform uint numSpheres;
+
+
+float EPSILON = 1e-5;
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= numSpheres) return;
+
+    vec3 pos_i = spheres[i].position.xyz;
+    float m_i = spheres[i].mass;
+
+    vec3 force = vec3(0.0);
+
+  
+    for (uint j = 0; j < numSpheres; ++j) {
+        if (i == j) continue;
+
+        vec3 r = spheres[j].position.xyz - pos_i;
+        float dist = length(r);
+        if (dist < 1e-5) continue;
+
+        float f = G * m_i * spheres[j].mass / (dist * dist);
+        force += f * normalize(r);
+    }
+
+    // update velocities + positions
+    vec3 acceleration = force / m_i;
+
+    vec3 v = spheres[i].velocity.xyz;
+    v += acceleration * dt;
+    vec3 p = pos_i + v * dt;
+
+    spheres[i].velocity = vec4(v, 1.0);
+    spheres[i].position = vec4(p, 1.0);
+}

@@ -18,8 +18,10 @@ public:
   ~MeshPlane();
   void draw() override;
   void update();
+  void setSphereSBBO(GLuint SpheresSBBO, size_t SizeOfSBBO);
   vec3 getLocation() const;
   Shader &getShader() const;
+  void updateSBBO_from_GPU() const;
   void updateSBBO(vector<Sphere> &objects) const;
 
 private:
@@ -39,6 +41,8 @@ private:
   unsigned int xSegments, zSegments;
   float yPos;
   float damping;
+  size_t SizeOfSBBO;
+  GLuint spheresSBBO;
   class Impl;
   std::unique_ptr<Impl> resources;
 };

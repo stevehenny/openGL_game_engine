@@ -25,6 +25,24 @@ Shader::Shader(const ShaderProgram &vertex, const ShaderProgram &fragment) {
   // glDetachShader(ID, fragment.getBindValue());
 }
 
+Shader::Shader(const ShaderProgram &comp) {
+
+  ID = glCreateProgram();
+  glAttachShader(ID, comp.getBindValue());
+
+  glLinkProgram(ID);
+
+  int success;
+  char infoLog[512];
+  glGetProgramiv(ID, GL_LINK_STATUS, &success);
+  if (!success) {
+    glGetProgramInfoLog(ID, 512, nullptr, infoLog);
+    std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+              << infoLog << std::endl;
+    throw std::runtime_error("Shader program linking failed");
+  }
+}
+
 Shader::~Shader() {
   if (glIsProgram(ID)) {
     glDeleteProgram(ID);
@@ -40,6 +58,10 @@ void Shader::setBool(unsigned int location, bool value) const {
 
 void Shader::setInt(unsigned int location, int value) const {
   glProgramUniform1i(ID, location, value);
+}
+
+void Shader::setUInt(unsigned int location, unsigned int value) const {
+  glProgramUniform1ui(ID, location, value);
 }
 
 void Shader::setFloat(unsigned int location, float value) const {

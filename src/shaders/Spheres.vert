@@ -18,6 +18,7 @@ struct Sphere {
   float radius;
   float mass;
   int textureInd;
+  int pad;
 };
 
 layout(std430, binding = 3) buffer SphereBuffer {

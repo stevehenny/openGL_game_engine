@@ -106,6 +106,17 @@ auto MeshPlane::generateVertices(double width, double depth) -> vector<Vertex> {
   }
   return vertices;
 }
+
+void MeshPlane::setSphereSBBO(GLuint SpheresSBBO, size_t SizeOfSBBO) {
+  this->spheresSBBO = SpheresSBBO;
+  this->SizeOfSBBO = SizeOfSBBO;
+}
+
+void MeshPlane::updateSBBO_from_GPU() const {
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, spheresSBBO);
+}
+
 auto MeshPlane::generateLineIndices() -> vector<unsigned int> {
 
   std::vector<unsigned int> indices;
@@ -212,7 +223,7 @@ void MeshPlane::draw() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, resources->planeLineEBO);
   glDrawElements(GL_LINES, static_cast<GLsizei>(planeLineIndices.size()),
                  GL_UNSIGNED_INT, 0);
-
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, spheresSBBO);
   glBindVertexArray(0);
 }
 

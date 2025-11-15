@@ -7,15 +7,17 @@ layout(location = 3) flat in int sphereIndex;
 
 layout(location = 0) out vec4 FragColor;
 
+
 struct Sphere {
-  vec4 objectColor;
-  vec4 position;
-  vec4 force;
-  vec4 velocity;
-  float radius;
-  float mass;
-  int textureInd;
+    vec4 objectColor;
+    vec4 position;
+    vec4 force;
+    vec4 velocity;
+    float radius;
+    float mass;
+    int textureInd;
 };
+
 layout(std430, binding = 3) buffer SphereBuffer {
     Sphere spheres[];
 };

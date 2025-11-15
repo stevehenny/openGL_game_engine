@@ -25,6 +25,8 @@ ShaderProgram::ShaderProgram(const std::string &programPath, uint8_t type) {
     bind = glCreateShader(GL_VERTEX_SHADER);
   else if (type == ShaderTypes::FRAGMENT)
     bind = glCreateShader(GL_FRAGMENT_SHADER);
+  else if (type == ShaderTypes::COMPUTE)
+    bind = glCreateShader(GL_COMPUTE_SHADER);
   else
     throw std::runtime_error("Invalid shader type");
 

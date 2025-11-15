@@ -11,6 +11,7 @@ public:
   unsigned int ID;
 
   Shader(const ShaderProgram &vertex, const ShaderProgram &fragment);
+  Shader(const ShaderProgram &comp);
   ~Shader();
 
   void useShader() const;
@@ -18,6 +19,7 @@ public:
   // ---- Uniform setters by SPIR-V layout location ----
   void setBool(unsigned int location, bool value) const;
   void setInt(unsigned int location, int value) const;
+  void setUInt(unsigned int location, unsigned int value) const;
   void setFloat(unsigned int location, float value) const;
 
   void setVec2(unsigned int location, const glm::vec2 &value) const;

@@ -31,4 +31,5 @@ inline string SPHERES_VERT = SHADER_FOLDER + "Spheres.vert.spv";
 inline string SPHERES_FRAG = SHADER_FOLDER + "Spheres.frag.spv";
 inline string SPHERES_GPU_VERT = SHADER_FOLDER + "Spheres_GPU.vert.spv";
 inline string SPHERES_GPU_FRAG = SHADER_FOLDER + "Spheres_GPU.frag.spv";
+inline string GRAVITY_COMP = SHADER_FOLDER + "gravity.comp.spv";
 } // namespace compiled_shaders

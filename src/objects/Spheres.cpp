@@ -15,7 +15,9 @@ public:
       : shader(Shader{ShaderProgram{compiled_shaders::SPHERES_GPU_VERT,
                                     ShaderTypes::VERTEX},
                       ShaderProgram{compiled_shaders::SPHERES_GPU_FRAG,
-                                    ShaderTypes::FRAGMENT}}) {
+                                    ShaderTypes::FRAGMENT}}),
+        computeShader(Shader{ShaderProgram{compiled_shaders::GRAVITY_COMP,
+                                           ShaderTypes::COMPUTE}}) {
     glGenVertexArrays(1, &SpheresVAO);
     glGenBuffers(1, &SpheresVBO);
     glGenBuffers(1, &SpheresEBO);
@@ -38,6 +40,7 @@ public:
   // shader program: GPU code to draw the sphere
   GLuint SpheresVAO, SpheresVBO, SpheresEBO, SpheresSBBO, SpheresTexturesSBBO;
   Shader shader;
+  Shader computeShader;
 };
 
 Spheres::Spheres(float radius, size_t sectorCount, size_t stackCount)
@@ -102,6 +105,8 @@ void Spheres::draw() {
                           GL_UNSIGNED_INT, 0,
                           static_cast<GLsizei>(spheres.size()));
 }
+
+Shader &Spheres::getComputeShader() { return resources->computeShader; }
 Shader &Spheres::getShader() { return resources->shader; }
 vector<Sphere> &Spheres::getSpheres() { return spheres; }
 VertexArray &Spheres::getVertexArray() { return data; }
@@ -115,6 +120,29 @@ void Spheres::addSphere(const Sphere &sphere) {
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
+
+GLuint Spheres::getSphereSBBO() { return resources->SpheresSBBO; }
+
+void Spheres::runComputeShader(float dt) {
+
+  resources->computeShader.useShader();
+  resources->computeShader.setFloat(
+      glGetUniformLocation(resources->computeShader.ID, "dt"), dt);
+  resources->computeShader.setFloat(
+      glGetUniformLocation(resources->computeShader.ID, "G"),
+      physics_constants::G);
+  resources->computeShader.setUInt(
+      glGetUniformLocation(resources->computeShader.ID, "numSpheres"),
+      spheres.size());
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, resources->SpheresSBBO);
+  GLuint groups = (spheres.size() + 255) / 256;
+  glDispatchCompute(groups, 1, 1);
+
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+void Spheres::bindComputeToSBBO() const {}
 
 void Spheres::computeForces() {
   for (auto &body : spheres) {
