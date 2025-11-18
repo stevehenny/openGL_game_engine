@@ -1,0 +1,6 @@
+#version 460 core
+
+// block size 256
+layout(local_size_x = 256) in;
+
+void main() {}

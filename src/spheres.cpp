@@ -27,17 +27,15 @@ static constexpr unsigned int SCR_WIDTH = 1920;
 static constexpr unsigned int SCR_HEIGHT = 1080;
 
 int main(int argc, char *argv[]) {
-  if (argc < 6) {
-    std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3> "
-                 "<texture4> <font>\n";
+  std::cerr << "Usage: ./lighting <texture1> <texture2> <texture3> "
+               "<texture4> <font>\n";
+  if (argc < 4) {
     return -1;
   }
 
   char *texturePath = argv[1];
   char *texture2Path = argv[2];
   char *texture3Path = argv[3];
-  char *texture4Path = argv[4];
-  char *font = argv[5];
 
   // GLFW setup
   glfwInit();
@@ -60,15 +58,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "Failed to initialize GLAD\n";
     return -1;
   }
-
-  // if (!GLAD_GL_ARB_bindless_texture) {
-  //   std::cerr << "Error: ARB_bindless_texture not supported on this GPU.\n";
-  //   exit(1);
-  // }
-  // check to verify binding bindless textures is compatible
-  // if(!GLAD_GL_ARB_bindless_texture){
-  //
-  // }
 
   Camera camera{vec3(0.0f, 0.0f, 3.0f),
                 vec3(0.f, 0.f, -1.f),
@@ -101,21 +90,6 @@ int main(int argc, char *argv[]) {
   std::vector<const char *> textures = {texturePath, texture2Path,
                                         texture3Path};
   GLuint textureArray = loadTextureArray(textures);
-  // texture1 = loadTexture(texturePath);
-  // texture2 = loadTexture(texture2Path);
-  // texture3 = loadTexture(texture3Path);
-
-  // vector<GLuint> textures = {texture1, texture2, texture3};
-
-  // std::vector<GLuint64> textureHandles;
-  // for (GLuint tex : {texture1, texture2, texture3}) {
-  //   GLuint64 handle = glGetTextureHandleARB(tex);
-  //   glMakeTextureHandleResidentARB(handle);
-  //   textureHandles.push_back(handle);
-  // }
-
-  // spheres.updateTextures(textureHandles);
-  // --- Cache uniform locations for object shader ---
   spheres.getShader().useShader();
   // spheres.updateTextures(textures);
   int modelLoc = glGetUniformLocation(spheres.getShader().ID, "model");
@@ -171,7 +145,7 @@ int main(int argc, char *argv[]) {
 
   std::uniform_real_distribution<float> velocity(-1, 1);
   std::uniform_real_distribution<float> position(-100, 100);
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 1000; ++i) {
     sphereData.push_back(Sphere{
         vec4(1.0f),
         vec4(position(uniformEngine), 1.0f, position(uniformEngine), 1.0f),
@@ -183,10 +157,14 @@ int main(int argc, char *argv[]) {
   // mesh.updateSBBO(sphereData);
   mesh.setSphereSBBO(spheres.getSphereSBBO(), sphereData.size());
   // spheres.getShader().setUniformTextures(texturesLoc, textures);
+  int curCount{};
+  int RefreshCount = 10;
   while (!glfwWindowShouldClose(window)) {
-
-    //*******CAMERA********//
+    ++curCount;
     glfwPollEvents();
+    //*******CAMERA********//
+    if (curCount >= RefreshCount) {
+    }
     float time = glfwGetTime();
     camera.update_camera_delta_time(time);
     camera.move_camera(window);
