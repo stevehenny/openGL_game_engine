@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "MeshPlane.h"
+#include "Particle.h"
 #include "top_level_include.h"
 #include "window_functions.h"
 #include <iostream>
@@ -36,6 +37,7 @@ int main(int argc, char *argv[]) {
   glfwSwapInterval(0);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   MeshPlane mesh{10.0, 10.0, 20u, 20u, 1.0f, 1.0f};
+  Particles particles(2u);
 
   mesh.getShader().useShader();
   int planeModelLoc = glGetUniformLocation(mesh.getShader().ID, "model");

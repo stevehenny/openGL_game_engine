@@ -1,6 +1,33 @@
 #version 460 core
-
-// block size 256
 layout(local_size_x = 256) in;
 
-void main() {}
+struct Particle {
+  vec4 position;
+  vec4 velocity;
+  vec2 amplitude; // real (x), imag (y)
+  float probability;
+  bool collapsed;
+};
+
+// Binding 0
+layout(std430, binding = 0) buffer ParticleBuffer {
+  Particle particles[];
+};
+
+layout(location = 1) uniform float dt;
+layout(location = 2) uniform uint numParticles;
+
+void main() {
+  uint id = gl_GlobalInvocationID.x;
+  if (id >= numParticles) return;
+
+  particles[id].position.xyz += particles[id].velocity.xyz * dt;
+
+  float phase = dt;
+  float re = particles[id].amplitude.x;
+  float im = particles[id].amplitude.y;
+  particles[id].amplitude.x = re * cos(phase) - im * sin(phase);
+  particles[id].amplitude.y = re * sin(phase) + im * cos(phase);
+
+  particles[id].probability = re * re + im * im;
+}

@@ -1,20 +1,22 @@
 #include "Particle.h"
 #include "Shader.h"
+#include "ShaderProgram.h"
+#include "ShaderPrograms.h"
 #include "top_level_include.h"
 #include <cstdint>
+#include <memory>
 #include <random>
 
 using glm::vec4, std::vector;
 class Particles::Impl {
 
 public:
-  void initializeParticles();
-  Impl() : computeShader(Shader()) {
+  Impl()
+      : computeShader(Shader(ShaderProgram{compiled_shaders::WAVE_FUNCTION_COMP,
+                                           ShaderTypes::COMPUTE})) {
     glGenBuffers(1, &ParticleVAO);
     // glGenBuffers(1, &ParticleVBO);
     glGenBuffers(1, &ParticleSBBO);
-
-    initializeParticles();
   }
 
   ~Impl() {
@@ -26,53 +28,69 @@ public:
   Shader computeShader;
 };
 
-Particles::Particles(uint32_t num_particles) {
+Particles::~Particles() = default;
+
+// keep method blank.
+void Particles::draw() {}
+
+Particles::Particles(uint32_t num_particles)
+    : resources(std::make_unique<Impl>()) {
 
   this->particles = generateParticles(num_particles);
-  // bind VAO
+
+  // Upload initial particle buffer
   glBindVertexArray(resources->ParticleVAO);
 
-  // setup SBBO
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, resources->ParticleSBBO);
-  glBufferData(GL_SHADER_STORAGE_BUFFER,
-               sizeof(Particle) * this->particles.size(),
-               this->particles.data(), GL_DYNAMIC_DRAW);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Particle) * particles.size(),
+               particles.data(), GL_DYNAMIC_DRAW);
+
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resources->ParticleSBBO);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-Particles::~Particles() = default;
-
-void Particles::draw() {}
-
 void Particles::evolve() {
-
   resources->computeShader.useShader();
 
-  // TODO: set uniforms
+  // Example uniforms
+  resources->computeShader.setFloat(
+      glGetUniformLocation(resources->computeShader.ID, "dt"), dt);
+  resources->computeShader.setUInt(
+      glGetUniformLocation(resources->computeShader.ID, "numParticles"),
+      particles.size());
 
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resources->ParticleSBBO);
+
   GLuint groups = (particles.size() + 255) / 256;
   glDispatchCompute(groups, 1, 1);
 
-  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-void Particles::measure() {}
+void Particles::measure() {
+  // Replace with collapse algorithm
+  for (auto &p : particles)
+    p.collapsed = true;
+}
 
-void Particles::updateProbabilities() {}
+void Particles::updateProbabilities() {
+  for (auto &p : particles)
+    p.probability = std::norm(p.amplitude);
+}
 
 vector<Particle> Particles::generateParticles(uint32_t num_particles) {
-  vector<Particle> particles(num_particles);
-  std::mt19937 random_engine;
-  std::uniform_real_distribution<float> uniform(0, 1);
-  for (uint32_t i{}; i < num_particles; ++i) {
-    particles[i].position =
-        vec4(uniform(random_engine), 1.0f, uniform(random_engine), 1.0f);
-    particles[i].velocity = vec4(0.0f);
-    particles[i].amplitude = std::complex<float>{1.0f, 0.0f};
-    particles[i].collapsed = false;
+  vector<Particle> p(num_particles);
+
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_real_distribution<float> unif(0.0f, 1.0f);
+
+  for (auto &x : p) {
+    x.position = vec4(unif(rng), unif(rng), unif(rng), 1.0f);
+    x.velocity = vec4(0.0f);
+    x.amplitude = {1.0f, 0.0f};
+    x.probability = 1.0f;
+    x.collapsed = false;
   }
 
-  return particles;
+  return p;
 }
