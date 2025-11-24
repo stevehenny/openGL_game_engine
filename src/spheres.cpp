@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 
   std::uniform_real_distribution<float> velocity(-1, 1);
   std::uniform_real_distribution<float> position(-100, 100);
-  for (int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < 10000; ++i) {
     sphereData.push_back(Sphere{
         vec4(1.0f),
         vec4(position(uniformEngine), 1.0f, position(uniformEngine), 1.0f),
