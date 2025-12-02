@@ -130,27 +130,30 @@ int main(int argc, char *argv[]) {
 
   vector<Sphere> sphereData;
   sphereData.push_back(Sphere{vec4(1.0f), vec4(20.0f, 1.0f, -20.0f, 1.0f),
-                              vec4(0.0f), vec4(-1.0f, 0.0f, -1.0f, 1.0f), 1.0f,
-                              1e13, 1});
+                              vec4(0.0f), vec4(-1.0f, 0.0f, -1.0f, 1.0f),
+                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
+                              1});
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(-20.0f, 1.0f, 20.0f, 1.0f),
-                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f), 1.0f,
-                              1e13, 0});
+                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f),
+                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
+                              0});
 
   sphereData.push_back(Sphere{vec4(1.0f), vec4(40.0f, 1.0f, -40.0f, 1.0f),
-                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f), 1.0f,
-                              1e13, 0});
+                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f),
+                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
+                              0});
 
   std::mt19937 uniformEngine(std::random_device{}());
 
   std::uniform_real_distribution<float> velocity(-1, 1);
   std::uniform_real_distribution<float> position(-100, 100);
-  for (int i = 0; i < 10000; ++i) {
-    sphereData.push_back(Sphere{
-        vec4(1.0f),
-        vec4(position(uniformEngine), 1.0f, position(uniformEngine), 1.0f),
-        vec4(0.0f), vec4(velocity(uniformEngine)), 1.0f, 1e13, 0});
-  }
+  // for (int i = 0; i < 1000; ++i) {
+  //   sphereData.push_back(Sphere{
+  //       vec4(1.0f),
+  //       vec4(position(uniformEngine), 1.0f, position(uniformEngine), 1.0f),
+  //       vec4(0.0f), vec4(velocity(uniformEngine)), 1.0f, 1e13, 0});
+  // }
 
   spheres.updateSBBO(sphereData);
   float dt = 0.0001f;

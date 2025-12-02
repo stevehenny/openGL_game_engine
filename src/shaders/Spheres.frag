@@ -12,12 +12,17 @@ struct Sphere {
   vec4 position;
   vec4 force;
   vec4 velocity;
+  vec4 Norm;
+  vec4 lightColor;
+  float specStrength;
+  float ambStrength;
   float radius;
   float mass;
   int textureInd;
 };
+
 layout(std430, binding = 3) buffer SphereBuffer {
-    Sphere spheres[];
+  Sphere spheres[];
 };
 
 // const int NUM_TEX = 128;
@@ -33,26 +38,26 @@ layout(location = 20) uniform sampler2DArray textures;
 
 vec3 computeLighting(vec3 lightPos, vec3 lightColor, vec3 baseColor)
 {
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
-    vec3 lightDir = normalize(lightPos - FragPos);
-    vec3 norm = normalize(Normal);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
-    float specularStrength = 0.5;
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularStrength * spec * lightColor;
-    return (ambient + diffuse + specular) * baseColor;
+  float ambientStrength = 0.1;
+  vec3 ambient = ambientStrength * lightColor;
+  vec3 lightDir = normalize(lightPos - FragPos);
+  vec3 norm = normalize(Normal);
+  float diff = max(dot(norm, lightDir), 0.0);
+  vec3 diffuse = diff * lightColor;
+  float specularStrength = 0.5;
+  vec3 viewDir = normalize(viewPos - FragPos);
+  vec3 reflectDir = reflect(-lightDir, norm);
+  float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+  vec3 specular = specularStrength * spec * lightColor;
+  return (ambient + diffuse + specular) * baseColor;
 }
 
 void main()
 {
-    vec4 texColor = texture(textures, vec3(TexCoord, spheres[sphereIndex].textureInd));
-    vec3 baseColor = texColor.rgb * spheres[sphereIndex].objectColor.rgb;
-    vec3 result = baseColor;
-    // result += computeLighting(lightPos, lightColor, baseColor);
-    // result += computeLighting(lightPos2, lightColor2, baseColor);
-    FragColor = vec4(result, texColor.a);
+  vec4 texColor = texture(textures, vec3(TexCoord, spheres[sphereIndex].textureInd));
+  vec3 baseColor = texColor.rgb * spheres[sphereIndex].objectColor.rgb;
+  vec3 result = baseColor;
+  // result += computeLighting(lightPos, lightColor, baseColor);
+  // result += computeLighting(lightPos2, lightColor2, baseColor);
+  FragColor = vec4(result, texColor.a);
 }

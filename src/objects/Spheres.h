@@ -18,6 +18,10 @@ struct alignas(16) Sphere {
   vec4 position;
   vec4 force;
   vec4 velocity;
+  vec4 Norm;
+  vec4 lightColor;
+  float specStrength;
+  float ambStrength;
   float radius;
   float mass;
   int textureInd;

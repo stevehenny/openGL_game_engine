@@ -15,13 +15,11 @@ public:
       : computeShader(Shader(ShaderProgram{compiled_shaders::WAVE_FUNCTION_COMP,
                                            ShaderTypes::COMPUTE})) {
     glGenBuffers(1, &ParticleVAO);
-    // glGenBuffers(1, &ParticleVBO);
     glGenBuffers(1, &ParticleSBBO);
   }
 
   ~Impl() {
     glDeleteBuffers(1, &ParticleVAO);
-    // glDeleteBuffers(1, &ParticleVBO);
     glDeleteBuffers(1, &ParticleSBBO);
   }
   GLuint ParticleVAO, ParticleSBBO;

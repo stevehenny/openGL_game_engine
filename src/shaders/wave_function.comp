@@ -4,7 +4,7 @@ layout(local_size_x = 256) in;
 struct Particle {
   vec4 position;
   vec4 velocity;
-  vec2 amplitude; // real (x), imag (y)
+  vec2 amplitude;
   float probability;
   bool collapsed;
 };
