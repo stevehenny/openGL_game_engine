@@ -25,6 +25,7 @@ struct alignas(16) Sphere {
   float radius;
   float mass;
   int textureInd;
+  bool isLightSource;
 };
 
 // Factory class for generating Spheres

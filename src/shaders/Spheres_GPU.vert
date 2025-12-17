@@ -4,8 +4,8 @@ layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
 
-layout(location = 0) out vec3 Normal;
-layout(location = 1) out vec3 FragPos;
+layout(location = 0) out vec4 Normal;
+layout(location = 1) out vec4 FragPos;
 layout(location = 2) out vec2 TexCoord;
 layout(location = 3) flat out int sphereIndex;
 
@@ -21,6 +21,7 @@ struct Sphere {
   float radius;
   float mass;
   int textureInd;
+  bool isLightSource;
 };
 
 layout(std430, binding = 3) buffer SphereBuffer {
@@ -37,8 +38,8 @@ void main()
 
   vec3 worldPos = spheres[instance].position.xyz + aPos;
 
-  FragPos = worldPos;
-  Normal = aNormal;
+  FragPos = vec4(worldPos, 1.0f);
+  Normal = vec4(aNormal, 1.0f);
   TexCoord = aTexCoord;
   sphereIndex = instance;
 

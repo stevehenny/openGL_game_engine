@@ -21,6 +21,7 @@ struct Sphere {
   float radius;
   float mass;
   int textureInd;
+  bool isLightSource;
 };
 
 // Uniforms

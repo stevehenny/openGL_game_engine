@@ -6,7 +6,6 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "ShaderPrograms.h"
-#include "TextRender.h"
 #include "Texture.h"
 #include "external/stb/stb_easy_font.h"
 #include "window_functions.h"
@@ -129,20 +128,44 @@ int main(int argc, char *argv[]) {
   int nbFrames = 0;
 
   vector<Sphere> sphereData;
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(20.0f, 1.0f, -20.0f, 1.0f),
-                              vec4(0.0f), vec4(-1.0f, 0.0f, -1.0f, 1.0f),
-                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
-                              1});
+  sphereData.push_back(Sphere{.objectColor = vec4(1.0f),
+                              .position = vec4(20.0f, 1.0f, -20.0f, 1.0f),
+                              .force = vec4(0.0f),
+                              .velocity = vec4(-1.0f, 0.0f, -1.0f, 1.0f),
+                              .Norm = vec4(1.0f),
+                              .lightColor = vec4(1.0f, 0.0f, 0.0f, 0.0f),
+                              .specStrength = 0.5f,
+                              .ambStrength = 0.5f,
+                              .radius = 1.0f,
+                              .mass = 1e13,
+                              .textureInd = 1,
+                              .isLightSource = true});
 
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(-20.0f, 1.0f, 20.0f, 1.0f),
-                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f),
-                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
-                              0});
+  sphereData.push_back(Sphere{.objectColor = vec4(1.0f),
+                              .position = vec4(-20.0f, 1.0f, 20.0f, 1.0f),
+                              .force = vec4(0.0f),
+                              .velocity = vec4(1.0f, -0.0f, 1.0f, 1.0f),
+                              .Norm = vec4(1.0f),
+                              .lightColor = vec4(1.0f),
+                              .specStrength = 0.5f,
+                              .ambStrength = 0.5f,
+                              .radius = 1.0f,
+                              .mass = 1e13,
+                              .textureInd = 0,
+                              .isLightSource = false});
 
-  sphereData.push_back(Sphere{vec4(1.0f), vec4(40.0f, 1.0f, -40.0f, 1.0f),
-                              vec4(0.0f), vec4(1.0f, -0.0f, 1.0f, 1.0f),
-                              vec4(1.0f), vec4(1.0f), 0.5f, 0.5f, 1.0f, 1e13,
-                              0});
+  sphereData.push_back(Sphere{.objectColor = vec4(1.0f),
+                              .position = vec4(40.0f, 1.0f, -40.0f, 1.0f),
+                              .force = vec4(0.0f),
+                              .velocity = vec4(1.0f, -0.0f, 1.0f, 1.0f),
+                              .Norm = vec4(1.0f),
+                              .lightColor = vec4(1.0f),
+                              .specStrength = 0.5f,
+                              .ambStrength = 0.5f,
+                              .radius = 1.0f,
+                              .mass = 1e13,
+                              .textureInd = 0,
+                              .isLightSource = false});
 
   std::mt19937 uniformEngine(std::random_device{}());
 

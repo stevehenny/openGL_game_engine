@@ -21,6 +21,7 @@ struct Sphere {
   float radius;
   float mass;
   int textureInd;
+  bool isLightSource;
 };
 
 layout(std430, binding = 3) buffer SphereBuffer {
